@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useReducer } from 'react';
-
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 const CartContext = createContext();
 
 const cartReducer = (state, action) => {
@@ -49,7 +48,9 @@ const cartReducer = (state, action) => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, { items: [] });
+    const [state, dispatch] = useReducer(cartReducer, {
+    items: JSON.parse(sessionStorage.getItem('cart') || '[]')
+    });
 
   const addToCart = (product) => {
     dispatch({ type: 'ADD_TO_CART', payload: product });
@@ -66,6 +67,9 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
   };
+    useEffect(() => {
+    sessionStorage.setItem('cart', JSON.stringify(state.items));
+    }, [state.items]);
 
   const getCartTotal = () => {
     return state.items.reduce((total, item) => total + item.price * item.quantity, 0);

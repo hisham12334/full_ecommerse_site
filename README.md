@@ -2,6 +2,8 @@
 
 A modern, responsive ecommerce website built with React, Vite, and Tailwind CSS. Features a complete shopping experience with product browsing, cart management, user authentication, and checkout functionality.
 
+> **Last Updated:** September 13, 2025 - Enhanced with latest features and improvements
+
 ## 🚀 Features
 
 - **Product Catalog**: Browse and search through products

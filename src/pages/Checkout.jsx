@@ -61,12 +61,40 @@ export default function Checkout() {
 
     setIsProcessing(true);
     
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsProcessing(false);
-    setOrderComplete(true);
-    clearCart();
+    try {
+      // Create order via API
+      const orderData = {
+        items: items,
+        total: total,
+        shippingAddress: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          phone: formData.phone
+        },
+        paymentMethod: formData.paymentMethod
+      };
+
+      // Import apiService at the top of the file
+      const apiService = (await import('../services/api')).default;
+      const response = await apiService.createOrder(orderData);
+      
+      if (response.success) {
+        setOrderComplete(true);
+        clearCart();
+      } else {
+        throw new Error('Failed to create order');
+      }
+    } catch (error) {
+      console.error('Order creation failed:', error);
+      alert('Failed to process order. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleInputChange = (e) => {

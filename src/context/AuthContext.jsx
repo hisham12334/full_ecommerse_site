@@ -1,29 +1,57 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import apiService from '../services/api';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  // Check for existing token on app startup
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      // In a real app, you'd verify the token with the server
+      // For now, we'll assume it's valid and extract user info
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp * 1000 > Date.now()) {
+          setUser({
+            id: payload.id,
+            email: payload.email,
+            name: localStorage.getItem('userName') || 'User',
+            avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${payload.email}`
+          });
+        } else {
+          // Token expired
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userName');
+        }
+      } catch (error) {
+        // Invalid token
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userName');
+      }
+    }
+    setIsInitializing(false);
+  }, []);
 
   const login = async (email, password) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await apiService.login({ email, password });
       
-      // Mock successful login
-      if (email && password) {
+      if (response.success) {
         const userData = {
-          id: 1,
-          name: 'John Doe',
-          email: email,
-          avatar: 'https://via.placeholder.com/40'
+          ...response.user,
+          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${response.user.email}`
         };
         setUser(userData);
+        localStorage.setItem('userName', userData.name);
         return { success: true, user: userData };
       } else {
-        throw new Error('Invalid credentials');
+        throw new Error(response.error || 'Login failed');
       }
     } catch (error) {
       return { success: false, error: error.message };
@@ -35,21 +63,18 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await apiService.register({ name, email, password });
       
-      // Mock successful registration
-      if (name && email && password) {
+      if (response.success) {
         const userData = {
-          id: Date.now(),
-          name: name,
-          email: email,
-          avatar: 'https://via.placeholder.com/40'
+          ...response.user,
+          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${response.user.email}`
         };
         setUser(userData);
+        localStorage.setItem('userName', userData.name);
         return { success: true, user: userData };
       } else {
-        throw new Error('Please fill all fields');
+        throw new Error(response.error || 'Registration failed');
       }
     } catch (error) {
       return { success: false, error: error.message };
@@ -59,12 +84,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    apiService.logout();
+    localStorage.removeItem('userName');
     setUser(null);
   };
 
   const value = {
     user,
     isLoading,
+    isInitializing,
     login,
     register,
     logout,

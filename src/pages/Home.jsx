@@ -100,11 +100,7 @@ export default function Home({ products = [], heroImageUrl, brandLogoUrl }) {
               </div>
 
               {/* Shopping Cart */}
-              <button 
-                onClick={() => user ? window.location.href = '/cart' : setShowAuthModal(true)}
-                className="p-2 rounded-md hover:bg-gray-100 relative" 
-                aria-label="bag">
-              
+              <Link to="/cart" className="p-2 rounded-md hover:bg-gray-100 relative" aria-label="bag">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M6 2h12l1 5H5l1-5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M6 7h12v13a2 2 0 01-2 2H8a2 2 0 01-2-2V7z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -114,21 +110,26 @@ export default function Home({ products = [], heroImageUrl, brandLogoUrl }) {
                     {getCartItemsCount()}
                   </span>
                 )}
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       </header>
 
       {/* Hero */}
-      <main className="w-full min-h-screen p-3">
-        <section className="relative grid grid-rows-2 sm:grid-rows-1 sm:grid-cols-1 gap-6">
-          <div className="relative overflow-hidden rounded-md mt-6">
+      <main className="w-full min-h-screen">
+        <section className="relative grid grid-rows-2 sm:grid-rows-1 sm:grid-cols-1 gap-6 p-3">
+          <div className="relative overflow-hidden rounded-md">
             <div className="aspect-[3/2] sm:aspect-[3/1] w-full bg-gray-50">
               {heroImageUrl ? (
                 <img src={heroImageUrl} alt="hero" className="w-full h-full object-cover object-center" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">Hero image</div>
+                <div className="w-full h-full bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <h2 className="text-2xl font-bold mb-2">Welcome to Our Store</h2>
+                    <p className="text-gray-300">Discover amazing products</p>
+                  </div>
+                </div>
               )}
             </div>
 

@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ProductDetails from './pages/ProductDetails';
+import AdminPanel from './pages/admin/AdminPanel'; // <-- IMPORT ADMIN PANEL
+import AdminRoute from './components/common/AdminRoute';
 import apiService from './services/api';
 import './styles/index.css';
 
@@ -86,6 +88,16 @@ function App() {
               />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
+
+              {/* Admin Route */}
+              <Route 
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminPanel />
+                  </AdminRoute>
+                } 
+              />
             </Routes>
           </div>
         </Router>

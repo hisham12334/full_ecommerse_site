@@ -8,30 +8,29 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // Check for existing token on app startup
+  // Check for existing user session on app startup
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    if (token) {
-      // In a real app, you'd verify the token with the server
-      // For now, we'll assume it's valid and extract user info
+    const storedUser = localStorage.getItem('user');
+
+    if (token && storedUser) {
       try {
+        const parsedUser = JSON.parse(storedUser);
         const payload = JSON.parse(atob(token.split('.')[1]));
+        
+        // Verify token is not expired
         if (payload.exp * 1000 > Date.now()) {
-          setUser({
-            id: payload.id,
-            email: payload.email,
-            name: localStorage.getItem('userName') || 'User',
-            avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${payload.email}`
-          });
+          setUser(parsedUser);
         } else {
-          // Token expired
+          // Token expired, clear storage
           localStorage.removeItem('authToken');
-          localStorage.removeItem('userName');
+          localStorage.removeItem('user');
         }
       } catch (error) {
-        // Invalid token
+        // Invalid data in storage, clear it
+        console.error("Failed to parse user session:", error);
         localStorage.removeItem('authToken');
-        localStorage.removeItem('userName');
+        localStorage.removeItem('user');
       }
     }
     setIsInitializing(false);
@@ -42,13 +41,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiService.login({ email, password });
       
-      if (response.success) {
+      if (response.success && response.user) {
         const userData = {
           ...response.user,
           avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${response.user.email}`
         };
+        
         setUser(userData);
-        localStorage.setItem('userName', userData.name);
+        // Store the complete user object and token
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('authToken', response.token);
+
         return { success: true, user: userData };
       } else {
         throw new Error(response.error || 'Login failed');
@@ -65,13 +68,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiService.register({ name, email, password });
       
-      if (response.success) {
+      if (response.success && response.user) {
         const userData = {
           ...response.user,
           avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${response.user.email}`
         };
+        
         setUser(userData);
-        localStorage.setItem('userName', userData.name);
+        // Store the complete user object and token
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('authToken', response.token);
+
         return { success: true, user: userData };
       } else {
         throw new Error(response.error || 'Registration failed');
@@ -84,8 +91,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    apiService.logout();
-    localStorage.removeItem('userName');
+    // Clear everything from storage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     setUser(null);
   };
 

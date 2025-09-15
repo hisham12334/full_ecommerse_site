@@ -19,26 +19,26 @@ class AuthController {
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
       
-      this.db.run("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", 
-        [name, email, hashedPassword], 
-        function(err) {
-          if (err) {
-            if (err.message.includes('UNIQUE constraint failed')) {
-              return res.status(400).json({ error: 'Email already exists' });
-            }
-            return res.status(500).json({ error: 'Registration failed' });
-          }
-          
-          const token = jwt.sign({ id: this.lastID, email }, JWT_SECRET, { expiresIn: '24h' });
-          res.status(201).json({
-            success: true,
-            user: { id: this.lastID, name, email },
-            token
-          });
-        }
-      );
+      const query = "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, role";
+      const values = [name, email, hashedPassword];
+
+      const result = await this.db.query(query, values);
+      const newUser = result.rows[0];
+
+      const token = jwt.sign({ id: newUser.id, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '24h' });
+      
+      res.status(201).json({
+        success: true,
+        user: newUser,
+        token
+      });
+
     } catch (error) {
-      res.status(500).json({ error: 'Server error' });
+        if (error.code === '23505') { // Unique constraint violation for PostgreSQL
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+        console.error('Registration error:', error);
+        res.status(500).json({ error: 'Server error during registration' });
     }
   }
 
@@ -50,31 +50,34 @@ class AuthController {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    this.db.get("SELECT * FROM users WHERE email = ?", [email], async (err, user) => {
-      if (err) {
-        return res.status(500).json({ error: 'Server error' });
-      }
+    try {
+        const result = await this.db.query("SELECT * FROM users WHERE email = $1", [email]);
+        const user = result.rows[0];
 
-      if (!user) {
-        return res.status(400).json({ error: 'Invalid credentials' });
-      }
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
 
-      try {
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
-          return res.status(400).json({ error: 'Invalid credentials' });
+            return res.status(400).json({ error: 'Invalid credentials' });
         }
 
         const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+        
+        // Return user data without the password hash
+        const { password: _, ...userResponse } = user;
+
         res.json({
-          success: true,
-          user: { id: user.id, name: user.name, email: user.email, role: user.role },
-          token
+            success: true,
+            user: userResponse,
+            token
         });
-      } catch (error) {
-        res.status(500).json({ error: 'Server error' });
-      }
-    });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Server error during login' });
+    }
   }
 }
 

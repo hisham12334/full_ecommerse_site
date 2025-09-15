@@ -1,3 +1,9 @@
+// Legacy api.js - now using modular structure
+// Import the new modular API services
+import { authAPI } from './api/auth';
+import { productsAPI } from './api/products';
+import { ordersAPI } from './api/orders';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApiService {
@@ -37,56 +43,46 @@ class ApiService {
     }
   }
 
-  // Auth methods
+  // Auth methods - now using modular auth API
   async register(userData) {
-    const response = await this.request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData)
-    });
-
+    const response = await authAPI.register(userData);
     if (response.success && response.token) {
       localStorage.setItem('authToken', response.token);
     }
-
     return response;
   }
 
   async login(credentials) {
-    const response = await this.request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials)
-    });
-
+    const response = await authAPI.login(credentials);
     if (response.success && response.token) {
       localStorage.setItem('authToken', response.token);
     }
-
     return response;
   }
 
   logout() {
+    authAPI.logout();
     localStorage.removeItem('authToken');
   }
 
-  // Product methods
+  // Product methods - now using modular products API
   async getProducts() {
-    return await this.request('/products');
+    return await productsAPI.getAll();
   }
 
   async getProduct(id) {
-    return await this.request(`/products/${id}`);
+    return await productsAPI.getById(id);
   }
 
-  // Order methods
+  // Order methods - now using modular orders API
   async createOrder(orderData) {
-    return await this.request('/orders', {
-      method: 'POST',
-      body: JSON.stringify(orderData)
-    });
+    const token = localStorage.getItem('authToken');
+    return await ordersAPI.create(orderData, token);
   }
 
   async getOrders() {
-    return await this.request('/orders');
+    const token = localStorage.getItem('authToken');
+    return await ordersAPI.getUserOrders(token);
   }
 
   // Health check
@@ -99,3 +95,6 @@ class ApiService {
 const apiService = new ApiService();
 
 export default apiService;
+
+// Export the new modular APIs for direct use
+export { authAPI, productsAPI, ordersAPI };

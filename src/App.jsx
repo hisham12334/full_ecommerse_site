@@ -17,6 +17,7 @@ function App() {
   // Fetch products on app startup
   useEffect(() => {
     const fetchProducts = async () => {
+      console.log('API Base URL:', apiService.baseURL);
       try {
         setIsLoading(true);
         const fetchedProducts = await apiService.getProducts();
@@ -27,38 +28,8 @@ function App() {
         setError('Failed to load products. Please try again later.');
         
         // Fallback to sample data if API fails
-        setProducts([
-          { 
-            id: 1, 
-            title: "Cotton Shirt", 
-            price: 799, 
-            image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=500&fit=crop",
-            description: "A comfortable cotton shirt perfect for casual wear. Made with 100% organic cotton.",
-            category: "men",
-            sizes: ["S", "M", "L", "XL"],
-            colors: ["White", "Blue", "Black"]
-          },
-          { 
-            id: 2, 
-            title: "Slim Fit Jeans", 
-            price: 1299, 
-            image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=500&fit=crop",
-            description: "Modern slim fit jeans that offer comfort and style for everyday wear.",
-            category: "men",
-            sizes: ["28", "30", "32", "34", "36"],
-            colors: ["Dark Blue", "Light Blue", "Black"]
-          },
-          { 
-            id: 3, 
-            title: "Sneakers", 
-            price: 1999, 
-            image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=500&fit=crop",
-            description: "Comfortable and stylish sneakers perfect for daily activities.",
-            category: "shoes",
-            sizes: ["7", "8", "9", "10", "11"],
-            colors: ["White", "Black", "Grey"]
-          }
-        ]);
+        
+        
       } finally {
         setIsLoading(false);
       }
@@ -104,7 +75,7 @@ function App() {
                 element={
                   <Home 
                     products={products}
-                    heroImageUrl="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop"
+                    heroImageUrl=""
                     brandLogoUrl=""
                   />
                 } 
@@ -124,3 +95,4 @@ function App() {
 }
 
 export default App;
+

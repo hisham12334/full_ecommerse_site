@@ -10,7 +10,12 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Initialize SQLite database
@@ -144,6 +149,23 @@ const authenticateToken = (req, res, next) => {
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running!' });
+});
+
+// Root API route
+app.get('/api', (req, res) => {
+  res.json({ 
+    message: 'E-commerce API is running',
+    version: '1.0.0',
+    endpoints: [
+      'GET /api/health',
+      'POST /api/auth/register', 
+      'POST /api/auth/login',
+      'GET /api/products',
+      'GET /api/products/:id',
+      'POST /api/orders',
+      'GET /api/orders'
+    ]
+  });
 });
 
 // User registration

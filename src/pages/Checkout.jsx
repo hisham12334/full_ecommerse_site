@@ -62,9 +62,21 @@ export default function Checkout() {
     setIsProcessing(true);
     
     try {
-      // Create order via API
+      // Create order via API - format items properly for the backend
+      const formattedItems = items.map(item => ({
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        image: item.image,
+        quantity: item.quantity,
+        variant_id: item.variant_id,
+        sku: item.sku,
+        size: item.selectedSize || item.size,
+        color: item.selectedColor || item.color
+      }));
+
       const orderData = {
-        items: items,
+        items: formattedItems,
         total: total,
         shippingAddress: {
           firstName: formData.firstName,
@@ -378,8 +390,8 @@ export default function Checkout() {
             <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Summary</h2>
             
             <div className="space-y-4 mb-6">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-4">
+              {items.map((item, index) => (
+                <div key={`${item.id}_${item.selectedSize}_${item.selectedColor}_${index}`} className="flex gap-4">
                   <img
                     src={item.image}
                     alt={item.title}
@@ -393,6 +405,9 @@ export default function Checkout() {
                     )}
                     {item.selectedColor && (
                       <p className="text-sm text-gray-500">Color: {item.selectedColor}</p>
+                    )}
+                    {item.sku && (
+                      <p className="text-sm text-gray-500">SKU: {item.sku}</p>
                     )}
                   </div>
                   <div className="text-right">

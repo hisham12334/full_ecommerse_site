@@ -12,6 +12,14 @@ export default function ProductDetails({ products = [] }) {
   const [isAdding, setIsAdding] = useState(false);
 
   const product = products.find(p => p.id === parseInt(id));
+  
+  // Extract available sizes from variants
+  const availableSizes = product?.variants ? 
+    product.variants.filter(v => v.quantity > 0).map(v => v.size) : [];
+  
+  // Parse colors from JSON string if needed
+  const availableColors = product?.colors ? 
+    (typeof product.colors === 'string' ? JSON.parse(product.colors) : product.colors) : [];
 
   if (!product) {
     return (
@@ -29,10 +37,17 @@ export default function ProductDetails({ products = [] }) {
   const handleAddToCart = async () => {
     setIsAdding(true);
     
+    // Find the selected variant
+    const selectedVariant = product.variants.find(v => v.size === selectedSize);
+    
     const cartItem = {
       ...product,
       selectedSize,
       selectedColor,
+      variant_id: selectedVariant?.id,
+      sku: selectedVariant?.sku,
+      size: selectedSize,
+      color: selectedColor,
     };
     
     addToCart(cartItem);
@@ -115,11 +130,11 @@ export default function ProductDetails({ products = [] }) {
             </div>
 
             {/* Size Selection */}
-            {product.sizes && product.sizes.length > 0 && (
+            {availableSizes && availableSizes.length > 0 && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Size</h3>
                 <div className="grid grid-cols-4 gap-2">
-                  {product.sizes.map((size) => (
+                  {availableSizes.map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
@@ -137,11 +152,11 @@ export default function ProductDetails({ products = [] }) {
             )}
 
             {/* Color Selection */}
-            {product.colors && product.colors.length > 0 && (
+            {availableColors && availableColors.length > 0 && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Color</h3>
                 <div className="space-y-2">
-                  {product.colors.map((color) => (
+                  {availableColors.map((color) => (
                     <label key={color} className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="radio"
@@ -162,9 +177,9 @@ export default function ProductDetails({ products = [] }) {
             <div className="space-y-4">
               <button
                 onClick={handleAddToCart}
-                disabled={isAdding || (product.sizes && !selectedSize) || (product.colors && !selectedColor)}
+                disabled={isAdding || (availableSizes.length > 0 && !selectedSize) || (availableColors.length > 0 && !selectedColor)}
                 className={`w-full py-3 px-6 rounded-sm font-semibold transition-colors ${
-                  isAdding || (product.sizes && !selectedSize) || (product.colors && !selectedColor)
+                  isAdding || (availableSizes.length > 0 && !selectedSize) || (availableColors.length > 0 && !selectedColor)
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : isInCart
                     ? 'bg-green-600 text-white hover:bg-green-700'
@@ -183,11 +198,11 @@ export default function ProductDetails({ products = [] }) {
                 )}
               </button>
 
-              {(product.sizes && !selectedSize) || (product.colors && !selectedColor) ? (
+              {(availableSizes.length > 0 && !selectedSize) || (availableColors.length > 0 && !selectedColor) ? (
                 <p className="text-sm text-red-600">
-                  Please select {!selectedSize && product.sizes ? 'size' : ''} 
-                  {!selectedSize && !selectedColor && product.sizes && product.colors ? ' and ' : ''}
-                  {!selectedColor && product.colors ? 'color' : ''}
+                  Please select {!selectedSize && availableSizes.length > 0 ? 'size' : ''} 
+                  {!selectedSize && !selectedColor && availableSizes.length > 0 && availableColors.length > 0 ? ' and ' : ''}
+                  {!selectedColor && availableColors.length > 0 ? 'color' : ''}
                 </p>
               ) : null}
 

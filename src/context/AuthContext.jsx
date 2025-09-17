@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const parsedUser = JSON.parse(storedUser);
         const payload = JSON.parse(atob(token.split('.')[1]));
-        
+
         // Verify token is not expired
         if (payload.exp * 1000 > Date.now()) {
           setUser(parsedUser);
@@ -40,13 +40,13 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const response = await apiService.login({ email, password });
-      
+
       if (response.success && response.user) {
         const userData = {
           ...response.user,
           avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${response.user.email}`
         };
-        
+
         setUser(userData);
         // Store the complete user object and token
         localStorage.setItem('user', JSON.stringify(userData));
@@ -67,13 +67,13 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const response = await apiService.register({ name, email, password });
-      
+
       if (response.success && response.user) {
         const userData = {
           ...response.user,
           avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${response.user.email}`
         };
-        
+
         setUser(userData);
         // Store the complete user object and token
         localStorage.setItem('user', JSON.stringify(userData));
@@ -94,9 +94,11 @@ export const AuthProvider = ({ children }) => {
     // Clear everything from storage
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('cart'); // This is the key line
     setUser(null);
+    // Force a reload to ensure all state is reset cleanly
+    window.location.href = '/'; 
   };
-
   const value = {
     user,
     isLoading,

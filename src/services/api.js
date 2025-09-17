@@ -1,32 +1,43 @@
-// Legacy api.js - now using modular structure
+// src/services/api.js
+
 // Import the new modular API services
 import { authAPI } from './api/auth';
 import { productsAPI } from './api/products';
 import { ordersAPI } from './api/orders';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = '/api'; // Use the proxy
 
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
   }
 
-  // Helper method to get auth headers
-  getAuthHeaders() {
+  // Helper method to get auth token without content-type
+  getAuthHeader() {
     const token = localStorage.getItem('authToken');
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
-    };
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
   // Generic request method
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    const config = {
-      headers: this.getAuthHeaders(),
-      ...options
+    
+    // Set default headers for JSON, but allow them to be overridden
+    const headers = {
+      'Content-Type': 'application/json',
+      ...this.getAuthHeader(),
+      ...options.headers,
     };
+
+    const config = {
+      ...options,
+      headers,
+    };
+    
+    // If body is FormData, let the browser set the Content-Type
+    if (options.body instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
 
     try {
       const response = await fetch(url, config);
@@ -43,51 +54,27 @@ class ApiService {
     }
   }
 
-  // Auth methods - now using modular auth API
+  // Auth methods
   async register(userData) {
-    const response = await authAPI.register(userData);
-    if (response.success && response.token) {
-      localStorage.setItem('authToken', response.token);
-    }
-    return response;
+    return this.request('/auth/register', { method: 'POST', body: JSON.stringify(userData) });
   }
 
   async login(credentials) {
-    const response = await authAPI.login(credentials);
-    if (response.success && response.token) {
-      localStorage.setItem('authToken', response.token);
-    }
-    return response;
+    return this.request('/auth/login', { method: 'POST', body: JSON.stringify(credentials) });
   }
-
-  logout() {
-    authAPI.logout();
-    localStorage.removeItem('authToken');
-  }
-
-  // Product methods - now using modular products API
+  
+  // Public product methods
   async getProducts() {
-    return await productsAPI.getAll();
+    return this.request('/products');
   }
 
   async getProduct(id) {
-    return await productsAPI.getById(id);
+    return this.request(`/products/${id}`);
   }
 
-  // Order methods - now using modular orders API
+  // Order methods
   async createOrder(orderData) {
-    const token = localStorage.getItem('authToken');
-    return await ordersAPI.create(orderData, token);
-  }
-
-  async getOrders() {
-    const token = localStorage.getItem('authToken');
-    return await ordersAPI.getUserOrders(token);
-  }
-
-  // Health check
-  async healthCheck() {
-    return await this.request('/health');
+    return this.request('/orders', { method: 'POST', body: JSON.stringify(orderData) });
   }
 }
 
@@ -95,6 +82,3 @@ class ApiService {
 const apiService = new ApiService();
 
 export default apiService;
-
-// Export the new modular APIs for direct use
-export { authAPI, productsAPI, ordersAPI };

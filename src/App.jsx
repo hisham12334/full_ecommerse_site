@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ProductDetails from './pages/ProductDetails';
-import AdminPanel from './pages/admin/AdminPanel'; // <-- IMPORT ADMIN PANEL
+import AdminPanel from './pages/admin/AdminPanel';
 import AdminRoute from './components/common/AdminRoute';
 import apiService from './services/api';
 import './styles/index.css';
@@ -19,7 +19,6 @@ function App() {
   // Fetch products on app startup
   useEffect(() => {
     const fetchProducts = async () => {
-      console.log('API Base URL:', apiService.baseURL);
       try {
         setIsLoading(true);
         const fetchedProducts = await apiService.getProducts();
@@ -28,10 +27,6 @@ function App() {
       } catch (error) {
         console.error('Failed to fetch products:', error);
         setError('Failed to load products. Please try again later.');
-        
-        // Fallback to sample data if API fails
-        
-        
       } finally {
         setIsLoading(false);
       }
@@ -88,7 +83,7 @@ function App() {
               />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-
+              
               {/* Admin Route */}
               <Route 
                 path="/admin"

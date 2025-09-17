@@ -3,34 +3,43 @@ class OrderController {
     this.db = db;
   }
 
-  // Create order
   async createOrder(req, res) {
     const { items, total, shippingAddress } = req.body;
     const userId = req.user.id;
 
-    if (!items || !total || !shippingAddress) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
+    if (!items || !total || !shippingAddress) return res.status(400).json({ error: 'Missing required fields' });
 
+    const client = await this.db.connect();
     try {
-      const query = "INSERT INTO orders (user_id, items, total, shipping_address) VALUES ($1, $2, $3, $4) RETURNING id";
-      const values = [userId, items, total, shippingAddress];
+      await client.query('BEGIN');
+
+      for (const item of items) {
+        if (!item.variant_id) throw new Error(`Item ${item.title} is missing a variant_id.`);
+        const stockResult = await client.query("SELECT quantity FROM product_variants WHERE id = $1 FOR UPDATE", [item.variant_id]);
+        if (stockResult.rows.length === 0) throw new Error(`Variant for product ${item.title} not found.`);
+        const currentStock = stockResult.rows[0].quantity;
+        if (currentStock < item.quantity) throw new Error(`Not enough stock for ${item.title} (Size: ${item.size}). Requested: ${item.quantity}, Available: ${currentStock}`);
+      }
+
+      const orderQuery = `INSERT INTO orders (user_id, items, total, shipping_address) VALUES ($1, $2, $3, $4) RETURNING id`;
+      const orderResult = await client.query(orderQuery, [userId, items, total, shippingAddress]);
+      const newOrderId = orderResult.rows[0].id;
+
+      for (const item of items) {
+        await client.query("UPDATE product_variants SET quantity = quantity - $1 WHERE id = $2", [item.quantity, item.variant_id]);
+      }
       
-      const result = await this.db.query(query, values);
-      const newOrderId = result.rows[0].id;
-      
-      res.status(201).json({
-        success: true,
-        orderId: newOrderId,
-        message: 'Order placed successfully'
-      });
+      await client.query('COMMIT');
+      res.status(201).json({ success: true, orderId: newOrderId, message: 'Order placed and inventory updated.' });
     } catch (error) {
-      console.error('Error creating order:', error);
-      res.status(500).json({ error: 'Failed to create order' });
+      await client.query('ROLLBACK');
+      console.error('Error processing order:', error);
+      res.status(400).json({ error: error.message });
+    } finally {
+      client.release();
     }
   }
-
-  // Get user orders
+  
   async getUserOrders(req, res) {
     const userId = req.user.id;
     try {
@@ -39,49 +48,6 @@ class OrderController {
     } catch (error) {
       console.error('Error fetching user orders:', error);
       res.status(500).json({ error: 'Failed to fetch orders' });
-    }
-  }
-
-  // Get all orders (admin only)
-  async getAllOrders(req, res) {
-    try {
-      const query = `
-        SELECT o.*, u.name as user_name, u.email as user_email 
-        FROM orders o 
-        JOIN users u ON o.user_id = u.id 
-        ORDER BY o.created_at DESC
-      `;
-      const result = await this.db.query(query);
-      res.json(result.rows);
-    } catch (error) {
-      console.error('Error fetching all orders:', error);
-      res.status(500).json({ error: 'Failed to fetch orders' });
-    }
-  }
-
-  // Update order status (admin only)
-  async updateOrderStatus(req, res) {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    if (!status) {
-      return res.status(400).json({ error: 'Status is required' });
-    }
-
-    try {
-      const result = await this.db.query("UPDATE orders SET order_status = $1 WHERE id = $2 RETURNING *", [status, id]);
-      
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: 'Order not found' });
-      }
-
-      res.json({
-        success: true,
-        message: 'Order status updated successfully'
-      });
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      res.status(500).json({ error: 'Failed to update order status' });
     }
   }
 }

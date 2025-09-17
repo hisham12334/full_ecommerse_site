@@ -101,8 +101,21 @@ class AdminController {
       // Parse variants
       parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
       
-      // Parse colors
-      parsedColors = colors ? (typeof colors === 'string' ? JSON.parse(colors) : colors) : [];
+      // Parse colors - handle both string and already parsed data
+      if (colors) {
+        if (typeof colors === 'string') {
+          try {
+            parsedColors = JSON.parse(colors);
+          } catch (e) {
+            // If JSON parsing fails, treat as comma-separated string
+            parsedColors = colors.split(',').map(c => c.trim()).filter(Boolean);
+          }
+        } else {
+          parsedColors = colors;
+        }
+      } else {
+        parsedColors = [];
+      }
       
       // Ensure parsedColors is an array
       if (!Array.isArray(parsedColors)) {
@@ -127,6 +140,8 @@ class AdminController {
 
     } catch (parseError) {
       console.error('Error parsing request data:', parseError);
+      console.error('Raw colors data:', colors);
+      console.error('Raw variants data:', variants);
       return res.status(400).json({ error: 'Invalid data format for variants or colors' });
     }
 
@@ -145,8 +160,19 @@ class AdminController {
         imagePath, 
         description ? description.trim() : '', 
         category || '', 
-        parsedColors
+        JSON.stringify(parsedColors) // Convert array to JSON string
       ];
+      
+      // Debug logging
+      console.log('Product values being inserted:', {
+        title: title.trim(),
+        price: parseFloat(price),
+        image: imagePath,
+        description: description ? description.trim() : '',
+        category: category || '',
+        colors: JSON.stringify(parsedColors),
+        parsedColors: parsedColors
+      });
       
       const productResult = await client.query(productQuery, productValues);
       const productId = productResult.rows[0].id;

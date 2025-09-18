@@ -62,21 +62,19 @@ export default function Checkout() {
     setIsProcessing(true);
     
     try {
-      // Create order via API - format items properly for the backend
-      const formattedItems = items.map(item => ({
-        id: item.id,
-        title: item.title,
-        price: item.price,
-        image: item.image,
-        quantity: item.quantity,
-        variant_id: item.variant_id,
-        sku: item.sku,
-        size: item.selectedSize || item.size,
-        color: item.selectedColor || item.color
-      }));
+      // Create a new items array with the correct variant_id for the backend
+      const itemsWithVariantId = items.map(item => {
+          // Find the variant_id from the product's variants array
+          const selectedVariant = item.variants.find(v => v.size === item.selectedSize);
+          return {
+              ...item,
+              variant_id: selectedVariant?.id,
+          };
+      });
 
+      // Create order via API
       const orderData = {
-        items: formattedItems,
+        items: itemsWithVariantId, // Use the new array with variant IDs
         total: total,
         shippingAddress: {
           firstName: formData.firstName,
@@ -103,7 +101,13 @@ export default function Checkout() {
       }
     } catch (error) {
       console.error('Order creation failed:', error);
-      alert('Failed to process order. Please try again.');
+      
+      // Check for the specific "Not enough stock" error message and provide a user-friendly alert
+      if (error.message.includes("Not enough stock")) {
+        alert(error.message); // Display the specific error from the backend
+      } else {
+        alert('Failed to process order. Please try again.');
+      }
     } finally {
       setIsProcessing(false);
     }

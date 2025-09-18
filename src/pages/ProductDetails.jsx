@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
@@ -12,14 +12,21 @@ export default function ProductDetails({ products = [] }) {
   const [isAdding, setIsAdding] = useState(false);
 
   const product = products.find(p => p.id === parseInt(id));
-  
-  // Extract available sizes from variants
-  const availableSizes = product?.variants ? 
-    product.variants.filter(v => v.quantity > 0).map(v => v.size) : [];
-  
-  // Parse colors from JSON string if needed
-  const availableColors = product?.colors ? 
-    (typeof product.colors === 'string' ? JSON.parse(product.colors) : product.colors) : [];
+
+  // Extract unique sizes and colors from the variants array
+  const availableSizes = product?.variants ? [...new Set(product.variants.map(v => v.size))] : [];
+  const availableColors = product?.colors || [];
+
+  useEffect(() => {
+    if (product) {
+      if (availableSizes.length > 0 && !selectedSize) {
+        setSelectedSize(availableSizes[0]);
+      }
+      if (availableColors.length > 0 && !selectedColor) {
+        setSelectedColor(availableColors[0]);
+      }
+    }
+  }, [product, selectedSize, selectedColor, availableSizes, availableColors]);
 
   if (!product) {
     return (
@@ -37,17 +44,16 @@ export default function ProductDetails({ products = [] }) {
   const handleAddToCart = async () => {
     setIsAdding(true);
     
-    // Find the selected variant
-    const selectedVariant = product.variants.find(v => v.size === selectedSize);
-    
+    // Find the correct variant with the selected size and color
+    const selectedVariant = product.variants.find(v => 
+      v.size === selectedSize
+    );
+
     const cartItem = {
       ...product,
       selectedSize,
       selectedColor,
       variant_id: selectedVariant?.id,
-      sku: selectedVariant?.sku,
-      size: selectedSize,
-      color: selectedColor,
     };
     
     addToCart(cartItem);
@@ -57,7 +63,11 @@ export default function ProductDetails({ products = [] }) {
     setIsAdding(false);
   };
 
-  const isInCart = items.some(item => item.id === product.id);
+  const isInCart = items.some(item => 
+    item.id === product.id &&
+    item.selectedSize === selectedSize &&
+    item.selectedColor === selectedColor
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -130,7 +140,7 @@ export default function ProductDetails({ products = [] }) {
             </div>
 
             {/* Size Selection */}
-            {availableSizes && availableSizes.length > 0 && (
+            {availableSizes.length > 0 && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Size</h3>
                 <div className="grid grid-cols-4 gap-2">
@@ -152,7 +162,7 @@ export default function ProductDetails({ products = [] }) {
             )}
 
             {/* Color Selection */}
-            {availableColors && availableColors.length > 0 && (
+            {availableColors.length > 0 && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Color</h3>
                 <div className="space-y-2">

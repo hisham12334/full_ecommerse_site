@@ -93,9 +93,9 @@ export default function Cart() {
           {/* Cart Items */}
           <div className="lg:col-span-2">
             <div className="space-y-4">
-              {items.map((item, index) => (
+              {items.map((item) => (
                 <motion.div
-                  key={`${item.id}_${item.selectedSize}_${item.selectedColor}_${index}`}
+                  key={item.key} // Use item.key here
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -109,19 +109,11 @@ export default function Cart() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900">{item.title}</h3>
                     <p className="text-sm text-gray-500">₹{item.price}</p>
-                    {(item.selectedSize || item.selectedColor) && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        {item.selectedSize && <span>Size: {item.selectedSize}</span>}
-                        {item.selectedSize && item.selectedColor && <span> • </span>}
-                        {item.selectedColor && <span>Color: {item.selectedColor}</span>}
-                        {item.sku && <span> • SKU: {item.sku}</span>}
-                      </div>
-                    )}
                     
                     <div className="flex items-center gap-3 mt-3">
                       <div className="flex items-center border border-gray-200 rounded">
                         <button
-                          onClick={() => updateQuantity(index, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.key, item.quantity - 1)} // Use item.key here
                           className="p-1 hover:bg-gray-100"
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -130,7 +122,7 @@ export default function Cart() {
                         </button>
                         <span className="px-3 py-1 text-sm font-medium">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(index, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.key, item.quantity + 1)} // Use item.key here
                           className="p-1 hover:bg-gray-100"
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -140,7 +132,7 @@ export default function Cart() {
                       </div>
                       
                       <button
-                        onClick={() => removeFromCart(index)}
+                        onClick={() => removeFromCart(item.key)} // Use item.key here
                         className="text-red-600 hover:text-red-800 text-sm font-medium"
                       >
                         Remove

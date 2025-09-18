@@ -13,6 +13,12 @@ export default function Home({ products = [], heroImageUrl, brandLogoUrl }) {
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
 
   const handleQuickAdd = (product) => {
+    // If product has variants, don't quick-add, force navigation to details page
+    if (product.sizes && product.sizes.length > 0) {
+      // This button should be disabled, but we'll add a check just in case.
+      return;
+    }
+    
     addToCart(product);
   };
 
@@ -232,7 +238,9 @@ export default function Home({ products = [], heroImageUrl, brandLogoUrl }) {
                       e.preventDefault();
                       handleQuickAdd(product);
                     }}
-                    className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    disabled={!!product.variants.length}
+                    className={`absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-opacity duration-200
+                      ${!!product.variants.length ? 'opacity-0' : 'opacity-100 group-hover:opacity-100'}`}
                     aria-label="Quick add to cart"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

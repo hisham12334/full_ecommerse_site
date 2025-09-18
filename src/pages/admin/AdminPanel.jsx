@@ -43,6 +43,8 @@ const OrderDetailsModal = ({ order, onClose }) => {
                                         <p className="font-semibold">{item.title}</p>
                                         <p className="text-sm text-gray-600">SKU: {item.sku || 'N/A'}</p>
                                         <p className="text-sm text-gray-600">Size: {item.size}</p>
+                                        {/* Added the new line below to display color */}
+                                        {item.selectedColor && <p className="text-sm text-gray-600">Color: {item.selectedColor}</p>}
                                     </div>
                                     <div className="text-right">
                                         <p>Qty: {item.quantity}</p>

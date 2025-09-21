@@ -1,54 +1,58 @@
-import { Link } from 'react-router-dom';
-import { useCart } from '../../../hooks/useCart';
-import Button from '../../common/Button';
+const Button = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
+  loading = false,
+  onClick,
+  type = 'button',
+  className = '',
+  ...props
+}) => {
+  // Base classes updated for sharp corners and bold font weight
+  const baseClasses = 'font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
 
-const ProductCard = ({ product }) => {
-  const { addToCart } = useCart();
-
-  const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(product);
+  // Variants updated to use the new brand colors and style
+  const variants = {
+    primary: 'bg-action-black text-white hover:bg-gray-800 focus:ring-black',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-action-black'
   };
 
+  const sizes = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base'
+  };
+
+  const classes = `
+    ${baseClasses}
+    ${variants[variant]}
+    ${sizes[size]}
+    ${disabled || loading ? 'opacity-50 cursor-not-allowed' : ''}
+    ${className}
+  `.trim();
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      <Link to={`/products/${product.id}`}>
-        <div className="aspect-w-1 aspect-h-1">
-          <img
-            src={product.image}
-            alt={product.title}
-            className="w-full h-64 object-cover"
-          />
+    <button
+      type={type}
+      className={classes}
+      disabled={disabled || loading}
+      onClick={onClick}
+      {...props}
+    >
+      {loading ? (
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+          Loading...
         </div>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-            {product.title}
-          </h3>
-          <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-            {product.description}
-          </p>
-          <div className="flex items-center justify-between">
-            <span className="text-xl font-bold text-blue-600">
-              ₹{product.price}
-            </span>
-            <span className="text-sm text-gray-500 capitalize">
-              {product.category}
-            </span>
-          </div>
-        </div>
-      </Link>
-      <div className="p-4 pt-0">
-        <Button
-          onClick={handleAddToCart}
-          className="w-full"
-          size="sm"
-        >
-          Add to Cart
-        </Button>
-      </div>
-    </div>
+      ) : (
+        children
+      )}
+    </button>
   );
 };
 
-export default ProductCard;
+export default Button;
+

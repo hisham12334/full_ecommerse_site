@@ -1,3 +1,5 @@
+// backend/src/controllers/adminController.js
+
 class AdminController {
   constructor(db) {
     this.db = db;
@@ -228,32 +230,76 @@ class AdminController {
   }
   
   async updateProduct(req, res) {
-    // This is a simplified update. A full implementation would handle variant updates.
-    // For now, we update the main product info.
     const { id } = req.params;
-    const { title, price, description, category, status } = req.body;
-    const image = req.file ? req.file.path : null;
+    const { title, price, description, category, colors, variants, status } = req.body;
+    const imagePath = req.file ? req.file.path : null;
+
+    let parsedVariants;
+    let parsedColors;
 
     try {
-      const fields = { title, price, description, category, status, image };
-      const setClauses = Object.keys(fields)
-        .filter(key => fields[key] !== null && fields[key] !== undefined)
-        .map((key, i) => `${key} = ${i + 1}`)
-        .join(', ');
+        parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+        if (colors) {
+            if (typeof colors === 'string') {
+                try {
+                    parsedColors = JSON.parse(colors);
+                } catch (e) {
+                    parsedColors = colors.split(',').map(c => c.trim()).filter(Boolean);
+                }
+            } else {
+                parsedColors = colors;
+            }
+        } else {
+            parsedColors = [];
+        }
+    } catch (parseError) {
+        return res.status(400).json({ error: 'Invalid data format for variants or colors' });
+    }
 
-      if (!setClauses) return res.status(400).json({ error: 'No fields to update' });
+    const client = await this.db.connect();
+    try {
+        await client.query('BEGIN');
 
-      const values = Object.values(fields).filter(value => value !== null && value !== undefined);
-      values.push(id);
+        const productFields = { title, price, description, category, status, colors: JSON.stringify(parsedColors) };
+        if (imagePath) {
+            productFields.image = imagePath;
+        }
 
-      const query = `UPDATE products SET ${setClauses} WHERE id = ${values.length} RETURNING *`;
-      const result = await this.db.query(query, values);
-      
-      if (result.rowCount === 0) return res.status(404).json({ error: 'Product not found' });
-      res.json({ success: true, message: 'Product updated successfully' });
+        const setClauses = Object.keys(productFields)
+            .filter(key => productFields[key] !== undefined)
+            .map((key, i) => `${key} = $${i + 1}`)
+            .join(', ');
+
+        if (setClauses) {
+            const values = Object.values(productFields).filter(v => v !== undefined);
+            values.push(id);
+            const productUpdateQuery = `UPDATE products SET ${setClauses} WHERE id = $${values.length} RETURNING *`;
+            await client.query(productUpdateQuery, values);
+        }
+
+        // Update variants
+        const variantUpdateQuery = `
+            INSERT INTO product_variants (product_id, size, sku, quantity)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (product_id, size) 
+            DO UPDATE SET sku = EXCLUDED.sku, quantity = EXCLUDED.quantity;
+        `;
+
+        for (const variant of parsedVariants) {
+            if (variant.sku && variant.sku.trim()) {
+                await client.query(variantUpdateQuery, [id, variant.size, variant.sku.trim(), variant.quantity || 0]);
+            }
+        }
+        
+        await client.query('COMMIT');
+        res.json({ success: true, message: 'Product updated successfully' });
+
     } catch (error) {
-       console.error('Failed to update product:', error);
-       res.status(500).json({ error: 'Failed to update product' });
+        await client.query('ROLLBACK');
+        console.error('Failed to update product:', error);
+        res.status(500).json({ error: 'Failed to update product' });
+    } finally {
+        client.release();
     }
   }
 

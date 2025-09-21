@@ -1,3 +1,5 @@
+// src/pages/Checkout.jsx
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -72,29 +74,18 @@ export default function Checkout() {
     };
 
     const createOrderWithBackend = async () => {
-        const itemsWithVariantId = items.map(item => {
-            const selectedVariant = item.variants.find(v => v.size === item.selectedSize);
-            return {
-                ...item,
-                variant_id: selectedVariant?.id,
-            };
-        });
+        // Refactored: Send only the necessary data to the backend.
+        const orderItems = items.map(item => ({
+            variant_id: item.variant_id,
+            quantity: item.quantity,
+            selectedColor: item.selectedColor
+        }));
 
         const orderData = {
-            items: itemsWithVariantId,
-            total: total,
-            shippingAddress: {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                address: formData.address,
-                city: formData.city,
-                state: formData.state,
-                zipCode: formData.zipCode,
-                phone: formData.phone
-            },
-            paymentMethod: formData.paymentMethod
+            items: orderItems,
+            shippingAddress: { ...formData }
         };
+
         const response = await apiService.createOrder(orderData);
         if (!response.success) {
             throw new Error(response.error || 'Failed to create order');
@@ -104,7 +95,14 @@ export default function Checkout() {
 
     const handlePayment = async (orderId) => {
         if (!razorpayReady) {
-            alert('Razorpay SDK is not loaded. Please try again.');
+            alert('Razorpay SDK could not be loaded. Please check your internet connection and try again.');
+            return;
+        }
+
+        const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+        if (!razorpayKey) {
+            alert('Razorpay Key ID is not configured. Please contact support.');
+            console.error('VITE_RAZORPAY_KEY_ID is not set in .env file');
             return;
         }
 
@@ -114,7 +112,7 @@ export default function Checkout() {
         });
 
         const options = {
-            key: rzp_test_RJwDeYKpIgZE8y, // REPLACE WITH YOUR ACTUAL TEST KEY ID
+            key: razorpayKey, // Using the key from your .env file
             amount: paymentIntent.amount,
             currency: paymentIntent.currency,
             order_id: paymentIntent.id,
@@ -148,8 +146,8 @@ export default function Checkout() {
 
         const paymentObject = new window.Razorpay(options);
         paymentObject.on('payment.failed', (response) => {
-            alert('Payment failed. Please try again.');
-            console.error(response.error);
+            alert('Payment failed. Please try again or choose another payment method.');
+            console.error('Razorpay payment failed:', response.error);
         });
         paymentObject.open();
     };
@@ -166,11 +164,10 @@ export default function Checkout() {
                 setOrderComplete(true);
                 clearCart();
             } else {
-                // For online payments, initiate Razorpay
                 await handlePayment(orderId);
             }
         } catch (error) {
-            console.error('Order creation failed:', error);
+            console.error('Order processing failed:', error);
             if (error.message.includes("Not enough stock")) {
               alert(error.message);
             } else {

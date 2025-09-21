@@ -1,3 +1,5 @@
+// src/pages/admin/AdminPanel.jsx
+
 import React, { useState, useEffect } from 'react';
 import { Eye, Package, Users, ShoppingBag, TrendingUp, X, Edit2, Trash2 } from 'lucide-react';
 import apiService from '../../services/api';
@@ -128,7 +130,7 @@ const AdminPanel = () => {
         e.preventDefault();
         
         // Validation
-        if (!productForm.title.trim() || !productForm.price || !productForm.image) {
+        if (!productForm.title.trim() || !productForm.price || (!productForm.image && !editingProduct) ) {
             alert('Please fill in all required fields (Title, Price, Image)');
             return;
         }
@@ -157,7 +159,7 @@ const AdminPanel = () => {
         
         // Fix: Filter out empty variants and ensure proper data types
         const validVariants = productForm.variants.filter(variant => 
-            variant.sku.trim() && variant.quantity > 0
+            variant.sku.trim() && variant.quantity >= 0
         ).map(variant => ({
             size: variant.size,
             sku: variant.sku.trim(),
@@ -179,7 +181,7 @@ const AdminPanel = () => {
             fetchData();
         } catch (error) {
             console.error('Error saving product:', error);
-            alert(`Error: Failed to create product. ${error.message || 'Please try again.'}`);
+            alert(`Error: Failed to save product. ${error.message || 'Please try again.'}`);
         }
     };
 
@@ -191,7 +193,20 @@ const AdminPanel = () => {
     };
 
     const editProduct = (product) => {
-        alert("Editing is disabled in this version. Please delete and recreate the product to update its details.");
+        setEditingProduct(product);
+        setProductForm({
+            title: product.title,
+            price: product.price,
+            description: product.description,
+            category: product.category,
+            colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
+            image: null,
+            variants: [
+                { size: 'S', sku: product.variants.find(v=>v.size === 'S')?.sku || '', quantity: product.variants.find(v=>v.size === 'S')?.quantity || 0 },
+                { size: 'M', sku: product.variants.find(v=>v.size === 'M')?.sku || '', quantity: product.variants.find(v=>v.size === 'M')?.quantity || 0 },
+                { size: 'L', sku: product.variants.find(v=>v.size === 'L')?.sku || '', quantity: product.variants.find(v=>v.size === 'L')?.quantity || 0 },
+            ]
+        });
     };
 
     const deleteProduct = async (id) => {

@@ -1,58 +1,76 @@
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
 class PaymentController {
   constructor(db) {
     this.db = db;
+    this.razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
   }
 
-  // Create payment intent (placeholder for payment gateway integration)
+  // Create payment intent
   async createPaymentIntent(req, res) {
     try {
-      const { orderId, amount } = req.body;
+      const { amount, currency = 'INR', orderId } = req.body;
 
-      if (!orderId || !amount) {
+      if (!amount || !orderId) {
         return res.status(400).json({ error: 'Order ID and amount are required' });
       }
 
-      // TODO: Integrate with payment gateway (Razorpay, Stripe, etc.)
-      const paymentIntent = {
-        id: `pi_${Date.now()}`,
-        orderId,
-        amount,
-        currency: 'INR',
-        status: 'requires_payment_method'
+      const options = {
+        amount: amount * 100, // Razorpay takes amount in paise
+        currency,
+        receipt: `receipt_order_${orderId}`,
+        payment_capture: 1, // Auto capture
       };
 
-      res.json(paymentIntent);
+      const razorpayOrder = await this.razorpay.orders.create(options);
+
+      res.json({
+        id: razorpayOrder.id,
+        currency: razorpayOrder.currency,
+        amount: razorpayOrder.amount,
+      });
     } catch (error) {
+      console.error('Failed to create Razorpay payment intent:', error);
       res.status(500).json({ error: 'Failed to create payment intent' });
     }
   }
 
   // Confirm payment
   async confirmPayment(req, res) {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId } = req.body;
+    
     try {
-      const { paymentIntentId, paymentMethodId } = req.body;
+      // Create a signature to verify
+      const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+      shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+      const digest = shasum.digest('hex');
 
-      if (!paymentIntentId || !paymentMethodId) {
-        return res.status(400).json({ error: 'Payment intent ID and payment method ID are required' });
+      // Compare the generated signature with the one received
+      if (digest !== razorpay_signature) {
+        return res.status(400).json({ error: 'Invalid signature' });
       }
 
-      // TODO: Confirm payment with payment gateway
-      const confirmedPayment = {
-        id: paymentIntentId,
-        status: 'succeeded',
-        confirmedAt: new Date().toISOString()
-      };
+      // Update the order in your database
+      const result = await this.db.query(
+          "UPDATE orders SET payment_id = $1, payment_status = 'paid', razorpay_order_id = $2 WHERE id = $3", 
+          [razorpay_payment_id, razorpay_order_id, orderId]
+      );
 
-      res.json(confirmedPayment);
+      res.json({ success: true, message: 'Payment confirmed and order updated' });
     } catch (error) {
+      console.error('Failed to confirm payment:', error);
       res.status(500).json({ error: 'Failed to confirm payment' });
     }
   }
 
-  // Get payment history
+  // Get payment history (Admin only - placeholder)
   async getPaymentHistory(req, res) {
     try {
-      // TODO: Implement payment history from database
+      // TODO: Implement fetching payment history from the database
       const payments = [];
       res.json(payments);
     } catch (error) {

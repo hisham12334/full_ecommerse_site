@@ -1,3 +1,5 @@
+// backend/src/controllers/paymentController.js
+
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
@@ -20,7 +22,7 @@ class PaymentController {
       }
 
       const options = {
-        amount: amount * 100, // Razorpay takes amount in paise
+        amount: Math.round(amount * 100), // Razorpay requires amount in paise (integer)
         currency,
         receipt: `receipt_order_${orderId}`,
         payment_capture: 1, // Auto capture
@@ -39,31 +41,55 @@ class PaymentController {
     }
   }
 
-  // Confirm payment
+  // Confirm payment with Idempotency Check
   async confirmPayment(req, res) {
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId } = req.body;
     
+    const client = await this.db.connect();
     try {
-      // Create a signature to verify
+      await client.query('BEGIN');
+
+      // Lock the order row to prevent race conditions from concurrent requests
+      const orderResult = await client.query("SELECT * FROM orders WHERE id = $1 FOR UPDATE", [orderId]);
+      
+      if (orderResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      
+      const order = orderResult.rows[0];
+
+      // IDEMPOTENCY CHECK: If payment is already confirmed, do nothing further.
+      if (order.payment_status === 'paid') {
+        await client.query('COMMIT'); // Commit to release the lock
+        return res.json({ success: true, message: 'Payment has already been confirmed for this order.' });
+      }
+
+      // Verify the signature from Razorpay
       const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
       shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
       const digest = shasum.digest('hex');
 
-      // Compare the generated signature with the one received
       if (digest !== razorpay_signature) {
-        return res.status(400).json({ error: 'Invalid signature' });
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Invalid signature. Payment verification failed.' });
       }
 
-      // Update the order in your database
-      const result = await this.db.query(
+      // If signature is valid and status is pending, update the order
+      await client.query(
           "UPDATE orders SET payment_id = $1, payment_status = 'paid', razorpay_order_id = $2 WHERE id = $3", 
           [razorpay_payment_id, razorpay_order_id, orderId]
       );
 
-      res.json({ success: true, message: 'Payment confirmed and order updated' });
+      await client.query('COMMIT');
+      res.json({ success: true, message: 'Payment confirmed and order updated successfully.' });
+
     } catch (error) {
+      await client.query('ROLLBACK');
       console.error('Failed to confirm payment:', error);
-      res.status(500).json({ error: 'Failed to confirm payment' });
+      res.status(500).json({ error: 'Failed to confirm payment due to a server error.' });
+    } finally {
+      client.release();
     }
   }
 

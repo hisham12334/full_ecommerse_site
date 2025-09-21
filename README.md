@@ -346,6 +346,7 @@ RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 - **File Upload Security**: Secure image upload with format validation
 - **Error Handling**: Centralized error responses
 - **Session Management**: Automatic token expiry and cleanup
+- **Payment Idempotency**: Implemented idempotency keys to prevent double payments and ensure transaction safety
 
 ## 🔐 Security Features
 
@@ -360,6 +361,8 @@ RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 - **CORS Configuration**: Proper cross-origin setup
 - **Error Handling**: Comprehensive error responses
 - **Session Management**: Automatic cleanup of expired tokens
+- **Payment Security**: Idempotency implementation prevents double payments and ensures transaction integrity
+- **Transaction Safety**: Unique payment identifiers and duplicate transaction detection
 
 ## 🎨 UI/UX Features
 

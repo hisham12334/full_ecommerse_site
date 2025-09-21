@@ -7,6 +7,7 @@ import HeroSection from "../components/common/HeroSection";
 
 export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
   const topProducts = products.slice(0, 6);
+  const marqueeText = "FREE DELIVERY ON ORDERS ABOVE ₹999 • PREMIUM QUALITY • FW24 COLLECTION • ";
   const { items, addToCart, getCartItemsCount } = useCart();
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -14,12 +15,10 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
 
   const handleQuickAdd = (product) => {
-    // If product has variants, don't quick-add, force navigation to details page
     if (product.sizes && product.sizes.length > 0) {
-      // This button should be disabled, but we'll add a check just in case.
       return;
     }
-    
+
     addToCart(product);
   };
 
@@ -30,7 +29,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <button className="p-2 md:hidden" aria-label="open menu">
+              <button className="p-2 md-hidden" aria-label="open menu">
                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24" className="text-gray-700">
                   <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -57,11 +56,10 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                   <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.5" />
                 </svg>
               </button>
-              
-              {/* User Account */}
+
               <div className="relative">
                 {user ? (
-                  <button 
+                  <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="p-2 rounded-md hover:bg-gray-100 flex items-center gap-2"
                   >
@@ -69,9 +67,9 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                     <span className="hidden md:block text-sm">{user.name}</span>
                   </button>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => setShowAuthModal(true)}
-                    className="p-2 rounded-md hover:bg-gray-100" 
+                    className="p-2 rounded-md hover:bg-gray-100"
                     aria-label="account"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -80,8 +78,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                     </svg>
                   </button>
                 )}
-                
-                {/* User Menu Dropdown */}
+
                 {showUserMenu && user && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50">
                     <div className="px-4 py-2 text-sm text-gray-700 border-b">
@@ -93,7 +90,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                     <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                       Orders
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         logout();
                         setShowUserMenu(false);
@@ -106,7 +103,6 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                 )}
               </div>
 
-              {/* Shopping Cart */}
               <Link to="/cart" className="p-2 rounded-md hover:bg-gray-100 relative" aria-label="bag">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M6 2h12l1 5H5l1-5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -123,21 +119,23 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
         </div>
       </header>
 
-      {/* Hero */}
-      <main className="w-full min-h-screen">
+      <main className="w-full min-h-screen bg-gray-50">
         <HeroSection heroImages={heroImages} />
 
-        {/* Secondary band */}
-        <section className="py-8 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <p className="text-lg font-medium text-gray-700">Free delivery on orders above ₹999</p>
-            </div>
-          </div>
+        <section className="py-4 bg-gray-50 border-y border-gray-200 overflow-hidden">
+          <motion.div
+            className="flex whitespace-nowrap"
+            initial={{ x: "0%" }}
+            animate={{ x: "-100%" }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          >
+            <span className="text-xl font-semibold text-gray-900 px-4">{marqueeText}</span>
+            <span className="text-xl font-semibold text-gray-900 px-4">{marqueeText}</span>
+            <span className="text-xl font-semibold text-gray-900 px-4">{marqueeText}</span>
+          </motion.div>
         </section>
 
-        {/* Promo tiles */}
-        <section className="mt-8 grid grid-cols-2 gap-4 px-2 sm:px-0">
+        <section className="mt-8 grid grid-cols-2 gap-4 px-2  sm:px-0 ">
           <div className="block rounded-md border border-gray-100 p-6 bg-white shadow-sm hover:shadow-md cursor-pointer">
             <h3 className="text-sm font-semibold text-gray-800">New here?</h3>
             <p className="mt-2 text-xs text-gray-500">Get 10% off your first order</p>
@@ -148,73 +146,84 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
           </div>
         </section>
 
-        {/* Products Grid */}
-        <section id="women" className="mt-10">
-          <div className="flex items-center justify-between mb-4 px-2 sm:px-0">
-            <h2 className="text-2xl font-semibold">Featured Products</h2>
-            <Link to="/" className="text-sm text-gray-600 hover:underline">View all</Link>
-          </div>
+        <section
+          id="women"
+          className="bg-brand-red-light text-white mt-16 pt-32 pb-16 sm:pt-40 sm:pb-24 [clip-path:polygon(0_10%,_100%_0,_100%_100%,_0%_100%)]"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+                /Featured Products
+              </h2>
+              <p className="mt-4 text-xl opacity-80">
+                Discover our latest collection of high-quality apparel.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {topProducts.length === 0 ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="rounded-md bg-white border border-gray-100 shadow-sm overflow-hidden">
-                  <div className="aspect-square bg-gray-50 flex items-center justify-center">Image</div>
-                  <div className="p-3">
-                    <div className="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-100 rounded w-1/3"></div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+              {topProducts.length === 0 ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="group relative">
+                    <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-red-400">
+                      <div className="h-full w-full bg-red-500"></div>
+                    </div>
+                    <div className="mt-4">
+                      <div className="h-4 bg-red-400 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-red-400 rounded w-1/3"></div>
+                    </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              topProducts.map((product) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: product.id * 0.1 }}
-                  className="group relative rounded-md bg-white border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  <Link to={`/product/${product.id}`}>
-                    <img 
-                      src={product.image} 
-                      alt={product.title} 
-                      className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" 
-                    />
-                  </Link>
-                  
-                  {/* Quick Add Button */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleQuickAdd(product);
-                    }}
-                    disabled={!!product.variants.length}
-                    className={`absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-opacity duration-200
-                      ${!!product.variants.length ? 'opacity-0' : 'opacity-100 group-hover:opacity-100'}`}
-                    aria-label="Quick add to cart"
+                ))
+              ) : (
+                topProducts.map((product) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: product.id * 0.1 }}
+                    className="group relative"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 5v14M5 12h14" />
-                    </svg>
-                  </button>
-
-                  <div className="p-3">
-                    <Link to={`/product/${product.id}`}>
-                      <div className="font-medium text-sm text-gray-800 group-hover:text-black transition-colors">
-                        {product.title}
+                    <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-100">
+                      <Link to={`/product/${product.id}`}>
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </Link>
+                    </div>
+                    <div className="mt-4 flex justify-between">
+                      <div>
+                        <h3 className="text-sm">
+                          <Link to={`/product/${product.id}`}>
+                            <span aria-hidden="true" className="absolute inset-0" />
+                            {product.title}
+                          </Link>
+                        </h3>
                       </div>
-                      <div className="mt-1 text-xs text-gray-500">₹{product.price.toLocaleString()}</div>
-                    </Link>
-                  </div>
-                </motion.div>
-              ))
-            )}
+                      <p className="text-sm font-medium">₹{product.price.toLocaleString()}</p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="mt-12 border-t border-gray-100 py-8">
+        {/* Red Background Section to Fill Gap */}
+        <section className="bg-brand-red py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-white uppercase tracking-wider mb-4">
+                Join the Movement
+              </h3>
+              <p className="text-white/80 text-lg">
+                Be part of the streetwear revolution
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <footer className="border-t bg-brand-red border-brand-red py-8">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-gray-600">
             <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
               <div>© {new Date().getFullYear()} Brand. All rights reserved.</div>
@@ -228,19 +237,17 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
         </footer>
       </main>
 
-      {/* Auth Modal */}
       {showAuthModal && (
-        <AuthModal 
-          mode={authMode} 
+        <AuthModal
+          mode={authMode}
           setMode={setAuthMode}
-          onClose={() => setShowAuthModal(false)} 
+          onClose={() => setShowAuthModal(false)}
         />
       )}
     </div>
   );
 }
 
-// Auth Modal Component
 function AuthModal({ mode, setMode, onClose }) {
   const { login, register, isLoading } = useAuth();
   const [formData, setFormData] = useState({
@@ -290,7 +297,7 @@ function AuthModal({ mode, setMode, onClose }) {
           <h2 className="text-2xl font-bold">
             {mode === 'login' ? 'Sign In' : 'Create Account'}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
@@ -352,11 +359,10 @@ function AuthModal({ mode, setMode, onClose }) {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-2 px-4 rounded-md font-semibold transition-colors ${
-              isLoading
+            className={`w-full py-2 px-4 rounded-md font-semibold transition-colors ${isLoading
                 ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                 : 'bg-black text-white hover:bg-gray-800'
-            }`}
+              }`}
           >
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">
@@ -374,8 +380,8 @@ function AuthModal({ mode, setMode, onClose }) {
             onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
             className="text-sm text-gray-600 hover:text-gray-900"
           >
-            {mode === 'login' 
-              ? "Don't have an account? Sign up" 
+            {mode === 'login'
+              ? "Don't have an account? Sign up"
               : 'Already have an account? Sign in'
             }
           </button>

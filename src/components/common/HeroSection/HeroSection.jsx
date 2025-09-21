@@ -128,7 +128,7 @@ const HeroSection = ({ heroImages = [] }) => {
                 transition={{ delay: 0.4 }}
               >
                 <button className="bg-black text-white px-8 py-3 font-semibold hover:bg-gray-800 transition-colors">
-                  Add to Basket
+                  View Collections
                 </button>
               </motion.div>
             </motion.div>

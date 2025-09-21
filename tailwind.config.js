@@ -6,6 +6,7 @@ export default {
     extend: {
       colors: {
         'brand-red': '#C73433',
+        'brand-red-light': '#E54848',
         'action-black': '#000000',
       },
       fontFamily: {
@@ -13,5 +14,8 @@ export default {
       },
     },
   },
+  
   plugins: [],
+
+  
 }

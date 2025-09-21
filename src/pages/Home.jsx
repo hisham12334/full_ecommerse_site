@@ -3,8 +3,9 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import HeroSection from "../components/common/HeroSection";
 
-export default function Home({ products = [], heroImageUrl, brandLogoUrl }) {
+export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
   const topProducts = products.slice(0, 6);
   const { items, addToCart, getCartItemsCount } = useCart();
   const { user, logout } = useAuth();
@@ -124,63 +125,13 @@ export default function Home({ products = [], heroImageUrl, brandLogoUrl }) {
 
       {/* Hero */}
       <main className="w-full min-h-screen">
-        <section className="relative grid grid-rows-2 sm:grid-rows-1 sm:grid-cols-1 gap-6 p-3">
-          <div className="relative overflow-hidden rounded-md">
-            <div className="aspect-[3/2] sm:aspect-[3/1] w-full bg-gray-50">
-              {heroImageUrl ? (
-                <img src={heroImageUrl} alt="hero" className="w-full h-full object-cover object-center" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <h2 className="text-2xl font-bold mb-2">Welcome to Our Store</h2>
-                    <p className="text-gray-300">Discover amazing products</p>
-                  </div>
-                </div>
-              )}
-            </div>
+        <HeroSection heroImages={heroImages} />
 
-            {/* Overlay text */}
-            <div className="absolute inset-0 flex flex-col justify-end pb-8 px-6 sm:pb-12">
-              <motion.h1
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-white text-4xl sm:text-6xl font-extrabold leading-tight drop-shadow-lg"
-                style={{ textShadow: '0 6px 18px rgba(0,0,0,0.4)' }}
-              >
-                New Arrivals
-              </motion.h1>
-
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mt-4"
-              >
-                <Link
-                  to="#women"
-                  className="inline-block bg-white/95 text-gray-900 px-6 py-3 rounded-sm font-semibold mr-3 shadow-sm hover:opacity-95"
-                >
-                  Shop Women
-                </Link>
-                <Link
-                  to="#men"
-                  className="inline-block bg-white/30 text-white px-6 py-3 rounded-sm font-semibold hover:opacity-95"
-                >
-                  Shop Men
-                </Link>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Secondary band */}
-          <div className="mt-4 sm:mt-0">
-            <div className="aspect-[3/1] w-full bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="max-w-2xl text-center p-6">
-                  <p className="text-lg sm:text-xl font-medium text-gray-700">Free delivery on orders above ₹999</p>
-                </div>
-              </div>
+        {/* Secondary band */}
+        <section className="py-8 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <p className="text-lg font-medium text-gray-700">Free delivery on orders above ₹999</p>
             </div>
           </div>
         </section>

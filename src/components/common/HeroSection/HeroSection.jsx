@@ -11,7 +11,7 @@ const HeroSection = ({ heroImages = [] }) => {
   const defaultImages = [
     {
       src: heroImage,
-      fallbackSrc: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop&crop=face',
+      fallbackSrc: '',
       alt: 'Tokyo Streetwear Collection',
       product: 'Tokyo Edition Tee',
       price: 2450,
@@ -19,7 +19,7 @@ const HeroSection = ({ heroImages = [] }) => {
     },
     {
       src: abstractModel,
-      fallbackSrc: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=600&fit=crop&crop=face',
+      fallbackSrc: '',
       alt: 'Abstract Art Collection',
       product: 'Abstract Design Tee',
       price: 1850,
@@ -27,7 +27,7 @@ const HeroSection = ({ heroImages = [] }) => {
     },
     {
       src: maroonModel,
-      fallbackSrc: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=face', 
+      fallbackSrc: '', 
       alt: 'Maroon Edition Collection',
       product: 'Maroon Edition Hoodie',
       price: 3200,
@@ -186,7 +186,7 @@ const HeroSection = ({ heroImages = [] }) => {
               </div>
 
               {/* Navigation Arrows */}
-              <div className="absolute top-1/2 -left-12 transform -translate-y-1/2">
+              <div className="absolute top-1/2 -left-12 transform -translate-y-1/3">
                 <button 
                   onClick={prevImage}
                   className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"

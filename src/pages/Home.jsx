@@ -12,6 +12,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
 
   const handleQuickAdd = (product) => {
@@ -29,25 +30,25 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <button className="p-2 md-hidden" aria-label="open menu">
-                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" className="text-gray-700">
-                  <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <button 
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="p-2 md:hidden hover:bg-red-500/20 rounded-md transition-colors" 
+                aria-label="open menu"
+              >
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" className="text-gray-900">
+                  <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              <div className="flex items-center gap-3">
+              
+            </div>
+
+            <div className="flex items-center gap-3">
                 {brandLogoUrl ? (
                   <img src={brandLogoUrl} alt="brand logo" className="h-7 w-auto object-contain" />
                 ) : (
-                  <Link to="/" className="font-medium text-lg tracking-wide">Brand</Link>
+                  <Link to="/" className="font-medium text-lg tracking-wide">DripKult</Link>
                 )}
               </div>
-            </div>
-
-            <div className="hidden md:flex items-center gap-6">
-              <Link to="/" className="text-sm font-medium hover:underline">Women</Link>
-              <Link to="/" className="text-sm font-medium hover:underline">Men</Link>
-              <Link to="/" className="text-sm font-medium hover:underline">New</Link>
-            </div>
 
             <div className="flex items-center gap-4">
               <button className="p-2 rounded-md hover:bg-gray-100" aria-label="search">
@@ -80,22 +81,30 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                 )}
 
                 {showUserMenu && user && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50">
-                    <div className="px-4 py-2 text-sm text-gray-700 border-b">
+                  <div className="absolute right-0 mt-2 w-48 bg-black border border-red-500/30 rounded-md shadow-xl py-1 z-50">
+                    <div className="px-4 py-2 text-sm text-gray-300 border-b border-red-500/20">
                       {user.email}
                     </div>
-                    <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                      Profile
-                    </button>
-                    <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <Link 
+                      to="/dashboard" 
+                      onClick={() => setShowUserMenu(false)}
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-red-500/20 font-bold uppercase tracking-wider transition-colors"
+                    >
+                      Dashboard
+                    </Link>
+                    <Link 
+                      to="/dashboard" 
+                      onClick={() => setShowUserMenu(false)}
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-red-500/20 font-bold uppercase tracking-wider transition-colors"
+                    >
                       Orders
-                    </button>
+                    </Link>
                     <button
                       onClick={() => {
                         logout();
                         setShowUserMenu(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-red-500/20 font-bold uppercase tracking-wider transition-colors"
                     >
                       Sign Out
                     </button>
@@ -118,6 +127,98 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu */}
+      {showMobileMenu && (
+        <>
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-20 md:hidden"
+            onClick={() => setShowMobileMenu(false)}
+          ></div>
+          
+          {/* Mobile Menu Content */}
+          <div className="md:hidden bg-white border-b border-red-500/30 z-30 relative shadow-lg">
+          <div className="px-4 py-4 space-y-2">
+            {/* Navigation Links */}
+            <div className="space-y-2">
+              <Link 
+                to="/" 
+                onClick={() => setShowMobileMenu(false)}
+                className="block px-4 py-3 text-gray-900 hover:bg-red-500/10 hover:text-red-600 font-bold uppercase tracking-wider transition-colors rounded-md"
+              >
+                Home
+              </Link>
+              <Link 
+                to="/" 
+                onClick={() => setShowMobileMenu(false)}
+                className="block px-4 py-3 text-gray-900 hover:bg-red-500/10 hover:text-red-600 font-bold uppercase tracking-wider transition-colors rounded-md"
+              >
+                New Arrivals
+              </Link>
+            </div>
+
+            {/* User Section */}
+            {user ? (
+              <div className="border-t border-red-500/20 pt-4 mt-4">
+                <div className="px-4 py-2 text-sm text-gray-600 border-b border-red-500/20 mb-2">
+                  {user.email}
+                </div>
+                <Link 
+                  to="/dashboard" 
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-4 py-3 text-gray-900 hover:bg-red-500/10 hover:text-red-600 font-bold uppercase tracking-wider transition-colors rounded-md"
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  to="/dashboard" 
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-4 py-3 text-gray-900 hover:bg-red-500/10 hover:text-red-600 font-bold uppercase tracking-wider transition-colors rounded-md"
+                >
+                  Orders
+                </Link>
+                <Link 
+                  to="/cart" 
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-4 py-3 text-gray-900 hover:bg-red-500/10 hover:text-red-600 font-bold uppercase tracking-wider transition-colors rounded-md"
+                >
+                  Cart ({getCartItemsCount()})
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setShowMobileMenu(false);
+                  }}
+                  className="block w-full text-left px-4 py-3 text-gray-900 hover:bg-red-500/10 hover:text-red-600 font-bold uppercase tracking-wider transition-colors rounded-md"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="border-t border-red-500/20 pt-4 mt-4">
+                <button 
+                  onClick={() => {
+                    setShowAuthModal(true);
+                    setShowMobileMenu(false);
+                  }}
+                  className="block w-full text-left px-4 py-3 text-gray-900 hover:bg-red-500/10 hover:text-red-600 font-bold uppercase tracking-wider transition-colors rounded-md"
+                >
+                  Sign In
+                </button>
+                <Link 
+                  to="/cart" 
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-4 py-3 text-gray-900 hover:bg-red-500/10 hover:text-red-600 font-bold uppercase tracking-wider transition-colors rounded-md"
+                >
+                  Cart ({getCartItemsCount()})
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+        </>
+      )}
 
       <main className="w-full min-h-screen bg-gray-50">
         <HeroSection heroImages={heroImages} />

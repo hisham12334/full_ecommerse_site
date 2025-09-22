@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ordersAPI } from '../services/api/orders';
-import { useAuth } from './useAuth';
+import { useAuth } from '../context/AuthContext';
 
 export const useOrders = () => {
   const { user } = useAuth();
@@ -9,16 +9,25 @@ export const useOrders = () => {
   const [error, setError] = useState(null);
 
   const fetchOrders = async () => {
-    if (!user) return;
-    
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('authToken');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       const data = await ordersAPI.getUserOrders(token);
-      setOrders(data);
+      setOrders(data || []);
     } catch (err) {
+      console.error('Error fetching orders:', err);
       setError(err.message);
+      setOrders([]);
     } finally {
       setLoading(false);
     }

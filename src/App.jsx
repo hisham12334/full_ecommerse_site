@@ -10,6 +10,7 @@ import AdminPanel from './pages/admin/AdminPanel';
 import AdminRoute from './components/common/AdminRoute';
 import apiService from './services/api';
 import './styles/index.css';
+import UserDashboard from './pages/UserDashboard';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -83,6 +84,7 @@ function App() {
               />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/dashboard" element={<UserDashboard />} />
               
               {/* Admin Route */}
               <Route 

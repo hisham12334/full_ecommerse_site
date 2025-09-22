@@ -27,7 +27,7 @@ const HeroSection = ({ heroImages = [] }) => {
     },
     {
       src: maroonModel,
-      fallbackSrc: '', 
+      fallbackSrc: '',
       alt: 'Maroon Edition Collection',
       product: 'Maroon Edition Hoodie',
       price: 3200,
@@ -51,23 +51,23 @@ const HeroSection = ({ heroImages = [] }) => {
   };
 
   return (
-    <section className="relative h-screen bg-gradient-to-br from-red-500 to-red-600 overflow-hidden">
+    <section className="relative min-h-screen bg-gradient-to-br from-red-500 to-red-600 overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-96 h-96 bg-white rounded-full"></div>
         <div className="absolute bottom-20 right-20 w-64 h-64 bg-white rounded-full"></div>
       </div>
 
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-10 min-h-screen flex items-center py-8 lg:py-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+
             {/* Left Side - Product Info */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
-              className="text-white space-y-8"
+              className="text-white space-y-6 lg:space-y-8 order-2 lg:order-1"
             >
               {/* Brand */}
               <div className="space-y-2">
@@ -85,7 +85,7 @@ const HeroSection = ({ heroImages = [] }) => {
                   transition={{ duration: 0.5 }}
                   className="space-y-4"
                 >
-                  <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
                     {currentImage.product?.split(' ').map((word, index) => (
                       <span key={index}>
                         {index === 0 ? '/' : ''}{word}
@@ -95,7 +95,7 @@ const HeroSection = ({ heroImages = [] }) => {
                   </h1>
                   <div className="flex items-center gap-4">
                     <span className="text-sm opacity-70">Size:</span>
-                    <span className="text-2xl font-bold">XL</span>
+                    <span className="text-xl lg:text-2xl font-bold">XL</span>
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -112,10 +112,10 @@ const HeroSection = ({ heroImages = [] }) => {
                 >
                   <div className="flex items-baseline gap-2">
                     <span className="text-sm opacity-70">₹</span>
-                    <span className="text-6xl font-bold">{currentImage.price}</span>
+                    <span className="text-4xl sm:text-5xl lg:text-6xl font-bold">{currentImage.price}</span>
                     <span className="text-lg opacity-70">.00</span>
                   </div>
-                  <p className="text-sm opacity-80 max-w-md">
+                  <p className="text-sm opacity-80 max-w-md leading-relaxed">
                     {currentImage.description}
                   </p>
                 </motion.div>
@@ -127,7 +127,7 @@ const HeroSection = ({ heroImages = [] }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <button className="bg-black text-white px-8 py-3 font-semibold hover:bg-gray-800 transition-colors">
+                <button className="bg-black text-white px-8 py-3 font-semibold hover:bg-gray-800 transition-colors rounded-md">
                   View Collections
                 </button>
               </motion.div>
@@ -138,13 +138,17 @@ const HeroSection = ({ heroImages = [] }) => {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative flex justify-center lg:justify-end"
+              className="relative flex justify-center lg:justify-end order-1 lg:order-2 mb-8 lg:mb-0"
             >
-              {/* Product Card Background */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-96 bg-white/10 backdrop-blur-sm rounded-lg"></div>
-              
+              {/* Product Card Background with Shadow */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-80 sm:w-80 sm:h-96 bg-white/10 backdrop-blur-sm rounded-lg shadow-2xl"></div>
+
               {/* Model Image */}
-              <div className="relative z-10 w-80 h-96 bg-white/20 backdrop-blur-sm rounded-lg overflow-hidden">
+              <div
+                className="relative z-10 w-72 h-80 sm:w-80 sm:h-96 bg-white/20 backdrop-blur-sm rounded-lg overflow-hidden shadow-xl cursor-pointer"
+                onClick={nextImage}
+              >
+
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentImageIndex}
@@ -154,9 +158,9 @@ const HeroSection = ({ heroImages = [] }) => {
                     transition={{ duration: 0.5 }}
                     className="w-full h-full"
                   >
-                    <img 
-                      src={currentImage.src} 
-                      alt={currentImage.alt} 
+                    <img
+                      src={currentImage.src}
+                      alt={currentImage.alt}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         // Try fallback image if main image fails
@@ -186,20 +190,20 @@ const HeroSection = ({ heroImages = [] }) => {
               </div>
 
               {/* Navigation Arrows */}
-              <div className="absolute top-1/2 -left-12 transform -translate-y-1/3">
-                <button 
+              <div className="absolute top-1/2 -left-6 sm:-left-12 transform -translate-y-1/2">
+                <button
                   onClick={prevImage}
-                  className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                  className="w-10 h-10 sm:w-8 sm:h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M15 18l-6-6 6-6" />
                   </svg>
                 </button>
               </div>
-              <div className="absolute top-1/2 -right-12 transform -translate-y-1/2">
-                <button 
+              <div className="absolute top-1/2 -right-6 sm:-right-12 transform -translate-y-1/2">
+                <button
                   onClick={nextImage}
-                  className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                  className="w-10 h-10 sm:w-8 sm:h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M9 18l6-6-6-6" />
@@ -212,14 +216,13 @@ const HeroSection = ({ heroImages = [] }) => {
       </div>
 
       {/* Bottom Navigation Dots */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
         {images.map((_, index) => (
           <button
             key={index}
             onClick={() => goToImage(index)}
-            className={`w-2 h-2 rounded-full transition-colors ${
-              index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-            }`}
+            className={`w-3 h-3 sm:w-2 sm:h-2 rounded-full transition-colors ${index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+              }`}
           />
         ))}
       </div>

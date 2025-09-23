@@ -237,18 +237,18 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
         </section>
 
         <section className="mt-8 grid grid-cols-2 gap-4 px-2  sm:px-0 ">
-          <div className="block rounded-md border border-gray-100 p-6 bg-white shadow-sm hover:shadow-md cursor-pointer">
+          <div className="block rounded-md border border-gray-100 p-6 bg-white shadow-sm hover:shadow-md active:shadow-lg active:scale-95 cursor-pointer transition-all duration-200">
             <h3 className="text-sm font-semibold text-gray-800">New here?</h3>
             <p className="mt-2 text-xs text-gray-500">Get 10% off your first order</p>
           </div>
-          <div className="block rounded-md border border-gray-100 p-6 bg-white shadow-sm hover:shadow-md cursor-pointer">
+          <div className="block rounded-md border border-gray-100 p-6 bg-white shadow-sm hover:shadow-md active:shadow-lg active:scale-95 cursor-pointer transition-all duration-200">
             <h3 className="text-sm font-semibold text-gray-800">Download our app</h3>
             <p className="mt-2 text-xs text-gray-500">For exclusive drops and offers</p>
           </div>
         </section>
 
         <section
-          id="women"
+          id="featured-products"
           className="bg-brand-red-light text-white mt-16 pt-32 pb-16 sm:pt-40 sm:pb-24 [clip-path:polygon(0_10%,_100%_0,_100%_100%,_0%_100%)]"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -281,14 +281,14 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: product.id * 0.1 }}
-                    className="group relative"
+                    className="group relative transition-transform duration-300 hover:scale-[1.02] active:scale-[1.02] cursor-pointer"
                   >
                     <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-100">
                       <Link to={`/product/${product.id}`}>
                         <img
-                          src={product.image}
+                          src={product.images && product.images.length > 0 ? product.images[0] : product.image}
                           alt={product.title}
-                          className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                          className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-110 group-active:scale-110 hover:scale-110 active:scale-110 touch-manipulation"
                         />
                       </Link>
                     </div>

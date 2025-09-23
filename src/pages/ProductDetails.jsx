@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
@@ -11,11 +11,39 @@ export default function ProductDetails({ products = [] }) {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const product = products.find(p => p.id === parseInt(id));
 
   const availableSizes = product?.variants ? [...new Set(product.variants.map(v => v.size))] : [];
   const availableColors = product?.colors || [];
+  
+  // Handle multiple images - memoized to prevent recreation on every render
+  const productImages = useMemo(() => {
+    let images = [];
+    
+    if (product?.images && product.images.length > 0) {
+      // Use actual images array if available from backend
+      images = product.images.filter(img => img);
+    } else if (product?.image) {
+      // Check localStorage for additional images (temporary demo solution)
+      const storedImages = localStorage.getItem(`product_images_${product.title}`);
+      if (storedImages) {
+        try {
+          const parsedImages = JSON.parse(storedImages);
+          images = parsedImages;
+        } catch (e) {
+          // Fallback to single image if parsing fails
+          images = [product.image];
+        }
+      } else {
+        // Fallback to single image
+        images = [product.image];
+      }
+    }
+    
+    return images;
+  }, [product?.images, product?.image, product?.title]);
 
   useEffect(() => {
     if (product) {
@@ -27,6 +55,52 @@ export default function ProductDetails({ products = [] }) {
       }
     }
   }, [product, selectedSize, selectedColor, availableSizes, availableColors]);
+
+  // Separate useEffect for resetting image index when product changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [product?.id]);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % productImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
+  };
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
+
+  // Touch/Swipe support for mobile
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && productImages.length > 1) {
+      nextImage();
+    }
+    if (isRightSwipe && productImages.length > 1) {
+      prevImage();
+    }
+  };
 
   const isInCart = items.some(item => 
     item.id === product?.id &&
@@ -88,8 +162,104 @@ export default function ProductDetails({ products = [] }) {
 
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="w-full aspect-square bg-gray-100">
-            <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+          {/* Enhanced Image Gallery with Swipe Support */}
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            transition={{ duration: 0.5 }} 
+            className="w-full"
+          >
+            {productImages.length > 0 ? (
+              <div className="relative">
+                {/* Main Image Display */}
+                <div 
+                  className="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden relative group cursor-pointer"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                  onClick={(e) => {
+                    if (productImages.length > 1 && !e.target.closest('button')) {
+                      nextImage();
+                    }
+                  }}
+                >
+                  <div className="relative w-full h-full">
+                    <img 
+                      key={`image-${currentImageIndex}`}
+                      src={productImages[currentImageIndex]} 
+                      alt={`${product.title} - Image ${currentImageIndex + 1}`} 
+                      className="w-full h-full object-cover transition-all duration-500 ease-in-out" 
+
+                    />
+
+                  </div>
+                  
+                  {/* Navigation Arrows - Only show if multiple images */}
+                  {productImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          prevImage();
+                        }}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center hover:scale-110 active:scale-95"
+                        aria-label="Previous image"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          nextImage();
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center hover:scale-110 active:scale-95"
+                        aria-label="Next image"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Image Counter */}
+                  {productImages.length > 1 && (
+                    <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
+                      {currentImageIndex + 1} / {productImages.length}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Thumbnail Navigation - Only show if multiple images */}
+                {productImages.length > 1 && (
+                  <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                    {productImages.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => goToImage(index)}
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                          currentImageIndex === index 
+                            ? 'border-action-black shadow-md' 
+                            : 'border-gray-200 hover:border-gray-400'
+                        }`}
+                      >
+                        <img 
+                          src={image} 
+                          alt={`${product.title} thumbnail ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="w-full aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                <span className="text-gray-400">No image available</span>
+              </div>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="flex flex-col justify-center">

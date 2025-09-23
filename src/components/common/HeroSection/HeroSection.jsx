@@ -127,7 +127,18 @@ const HeroSection = ({ heroImages = [] }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <button className="bg-black text-white px-8 py-3 font-semibold hover:bg-gray-800 transition-colors rounded-md">
+                <button
+                  onClick={() => {
+                    const featuredSection = document.getElementById('featured-products');
+                    if (featuredSection) {
+                      featuredSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                    }
+                  }}
+                  className="bg-black text-white px-6 py-3 sm:px-8 sm:py-3 text-sm sm:text-base font-semibold hover:bg-gray-800 active:bg-gray-700 transition-all duration-200 rounded-md min-h-[44px] w-full sm:w-auto"
+                >
                   View Collections
                 </button>
               </motion.div>

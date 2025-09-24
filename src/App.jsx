@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-import Home from './pages/Home';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import ProductDetails from './pages/ProductDetails';
-import AdminPanel from './pages/admin/AdminPanel';
 import AdminRoute from './components/common/AdminRoute';
 import apiService from './services/api';
 import './styles/index.css';
-import UserDashboard from './pages/UserDashboard';
+
+// Lazily import page components
+const Home = lazy(() => import('./pages/Home'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const ProductDetails = lazy(() => import('./pages/ProductDetails'));
+const AdminPanel = lazy(() => import('./pages/admin/AdminPanel'));
+const UserDashboard = lazy(() => import('./pages/UserDashboard'));
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -67,35 +69,41 @@ function App() {
               </div>
             )}
             
-            <Routes>
-              <Route 
-                path="/" 
-                element={
-                  <Home 
-                    products={products}
-                    heroImageUrl=""
-                    brandLogoUrl=""
-                  />
-                } 
-              />
-              <Route 
-                path="/product/:id" 
-                element={<ProductDetails products={products} />} 
-              />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/dashboard" element={<UserDashboard />} />
-              
-              {/* Admin Route */}
-              <Route 
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <AdminPanel />
-                  </AdminRoute>
-                } 
-              />
-            </Routes>
+            <Suspense fallback={
+              <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+              </div>
+            }>
+              <Routes>
+                <Route 
+                  path="/" 
+                  element={
+                    <Home 
+                      products={products}
+                      heroImageUrl=""
+                      brandLogoUrl=""
+                    />
+                  } 
+                />
+                <Route 
+                  path="/product/:id" 
+                  element={<ProductDetails products={products} />} 
+                />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/dashboard" element={<UserDashboard />} />
+                
+                {/* Admin Route */}
+                <Route 
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <AdminPanel />
+                    </AdminRoute>
+                  } 
+                />
+              </Routes>
+            </Suspense>
           </div>
         </Router>
       </CartProvider>
@@ -104,4 +112,3 @@ function App() {
 }
 
 export default App;
-

@@ -5,6 +5,10 @@ class ProductController {
 
   // Get all products with their variants for the public storefront
   async getAllProducts(req, res) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
     try {
       const query = `
         SELECT 
@@ -21,9 +25,10 @@ class ProductController {
         LEFT JOIN product_variants pv ON p.id = pv.product_id
         WHERE p.status = 'active'
         GROUP BY p.id
-        ORDER BY p.created_at DESC;
+        ORDER BY p.created_at DESC
+        LIMIT $1 OFFSET $2;
       `;
-      const result = await this.db.query(query);
+      const result = await this.db.query(query, [limit, offset]);
       res.json(result.rows);
     } catch (error) {
       console.error('Error fetching products with variants:', error);

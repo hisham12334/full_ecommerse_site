@@ -22,8 +22,12 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'ecommerce-products',
-    allowed_formats: ['jpg', 'png', 'jpeg'],
-    transformation: [{ width: 500, height: 500, crop: 'limit' }]
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'avif'], // Allow modern formats
+    transformation: [
+      { width: 1000, height: 1000, crop: 'limit' }, // Increase resolution for quality
+      { fetch_format: 'auto' }, // Automatically choose the best format
+      { quality: 'auto' } // Automatically determine the best quality
+    ]
   },
 });
 

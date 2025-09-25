@@ -5,7 +5,7 @@ import { authAPI } from './api/auth';
 import { productsAPI } from './api/products';
 import { ordersAPI } from './api/orders';
 
-const API_BASE_URL = '/api'; // Use the proxy
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 class ApiService {
   constructor() {

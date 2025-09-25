@@ -1,4 +1,6 @@
-const API_BASE_URL = '/api'; 
+// src/services/api/products.js
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const productsAPI = {
   getAll: async () => {

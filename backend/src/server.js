@@ -63,8 +63,27 @@ const createPaymentRoutes = require('./routes/payments');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// --- START: NEW CORS CONFIGURATION ---
+const allowedOrigins = [
+  'https://dripkult.netlify.app', // Your live frontend URL
+  'http://localhost:5173'      // Your local development frontend URL
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+};
+
+app.use(cors(corsOptions));
+// --- END: NEW CORS CONFIGURATION ---
+
 app.use(express.json());
 
 // Initialize database

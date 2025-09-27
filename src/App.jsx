@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { useProductsContext } from './context/ProductContext';
 import AdminRoute from './components/common/AdminRoute';
 import apiService from './services/api';
 import './styles/index.css';
@@ -15,28 +16,11 @@ const AdminPanel = lazy(() => import('./pages/admin/AdminPanel'));
 const UserDashboard = lazy(() => import('./pages/UserDashboard'));
 
 function App() {
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  const { products, isLoading, error } = useProductsContext();
 
   // Fetch products on app startup
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const fetchedProducts = await apiService.getProducts();
-        setProducts(fetchedProducts);
-        setError(null);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-        setError('Failed to load products. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+  
 
   if (isLoading) {
     return (

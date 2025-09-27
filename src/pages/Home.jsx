@@ -261,7 +261,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 lg:gap-y-12">
               {topProducts.length === 0 ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="group relative">
@@ -286,9 +286,10 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                     <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-100">
                       <Link to={`/product/${product.id}`}>
                         <img
-                          src={product.images && product.images.length > 0 ? product.images[0] : product.image}
+                          src={(product.images && product.images[0]) || product.image || ''}
                           alt={product.title}
                           className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-110 group-active:scale-110 hover:scale-110 active:scale-110 touch-manipulation"
+                           // Add this line
                         />
                       </Link>
                     </div>

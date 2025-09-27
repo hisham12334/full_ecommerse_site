@@ -1,5 +1,3 @@
-// Legacy server.js - now using modular structure
-// This file is kept for backward compatibility
-// The new modular server is in src/server.js
-
+// backend/server.js
+// This file is a wrapper. Its only job is to start the real server.
 require('./src/server');

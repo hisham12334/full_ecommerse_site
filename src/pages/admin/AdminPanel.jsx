@@ -458,7 +458,7 @@ const AdminPanel = () => {
                               <div className="max-h-[70vh] overflow-y-auto">{loading ? <div className="p-6 text-center">Loading...</div> : products.map(p => (
                                   <div key={p.id} className="p-4 border-b flex items-center justify-between hover:bg-gray-50 active:bg-gray-100">
                                       <div className="flex items-center min-w-0 flex-1">
-                                          <img src={p.image} alt={p.title} className="w-12 h-12 lg:w-16 lg:h-16 object-cover rounded flex-shrink-0"/>
+                                          <img src={(p.images && p.images[0]) || p.image || ''} alt={p.title} className="w-12 h-12 lg:w-16 lg:h-16 object-cover rounded flex-shrink-0"/>
                                           <div className="ml-3 lg:ml-4 min-w-0 flex-1">
                                               <p className="font-semibold text-sm lg:text-base truncate">{p.title}</p>
                                               <p className="text-xs lg:text-sm text-gray-500">₹{p.price}</p>

@@ -26,8 +26,8 @@ const createAdminRoutes = (db) => {
   
   // Product Management
   router.get('/products', adminController.getAllProducts.bind(adminController));
-  router.post('/products', upload.single('image'), adminController.createProduct.bind(adminController));
-  router.put('/products/:id', upload.single('image'), adminController.updateProduct.bind(adminController));
+   router.post('/products', upload.array('images', 3), adminController.createProduct.bind(adminController));
+  router.put('/products/:id', upload.array('images', 3), adminController.updateProduct.bind(adminController));
   router.delete('/products/:id', adminController.deleteProduct.bind(adminController));
   // --- END: THE FIX ---
 

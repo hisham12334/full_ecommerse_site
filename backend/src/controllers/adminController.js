@@ -10,44 +10,36 @@ class AdminController {
         console.log('Received new product request. Body:', req.body);
         console.log('Received file:', req.file);
 
-        const { title, price, description, category, colors, variants } = req.body;
-        const imagePath = req.file ? req.file.path : '';
-
-        if (!title || !price || !imagePath) {
-            return res.status(400).json({ error: 'Title, price, and a main image are required.' });
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: 'At least one image is required.' });
         }
+        const imagePaths = req.files.map(file => file.path);
 
-        let parsedVariants = [];
-        let parsedColors = [];
+        const { title, price, description, category, colors, variants } = req.body;
+        ;
+
+        if (!title || !price) {
+            return res.status(400).json({ error: 'Title and price are required.' });
+        }
+        
+        let parsedVariants = [], parsedColors = [];
         try {
-            // Robustly parse variants and colors, providing defaults if they are missing
-            if (variants) {
-                parsedVariants = JSON.parse(variants);
-            }
-            if (colors) {
-                parsedColors = JSON.parse(colors);
-            }
+            if (variants) parsedVariants = JSON.parse(variants);
+            if (colors) parsedColors = JSON.parse(colors);
         } catch (e) {
-            console.error('JSON Parsing Error:', e);
-            return res.status(400).json({ error: 'Invalid format for variants or colors. Please check your data.' });
+            return res.status(400).json({ error: 'Invalid JSON for variants or colors.' });
         }
 
         const client = await this.db.connect();
         try {
             await client.query('BEGIN');
-            console.log('Database transaction started.');
-
+            
             const productQuery = `
-                INSERT INTO products (title, price, images, description, category, colors, status) 
-                VALUES ($1, $2, $3, $4, $5, $6, 'active') RETURNING id
+                INSERT INTO products (title, price, images, description, category, colors) 
+                VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
             `;
             const productValues = [
-                title.trim(),
-                parseFloat(price),
-                JSON.stringify([imagePath]), // Save the uploaded image URL in an array
-                description || null,
-                category || null,
-                JSON.stringify(parsedColors)
+                title, parseFloat(price), JSON.stringify(imagePaths), description, category, JSON.stringify(parsedColors)
             ];
             
             const productResult = await client.query(productQuery, productValues);

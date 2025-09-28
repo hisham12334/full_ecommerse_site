@@ -134,7 +134,7 @@ const AdminPanel = () => {
     // New state for the variant-based form with multiple images support
     const initialFormState = {
         title: '', price: '', description: '', category: '', colors: '', 
-        images: [null, null, null], // Support for 3 images
+        images: [], // Support for 3 images
         variants: [
             { size: 'S', sku: '', quantity: 0 },
             { size: 'M', sku: '', quantity: 0 },
@@ -178,92 +178,43 @@ const AdminPanel = () => {
         setProductForm(prev => ({ ...prev, variants: updatedVariants }));
     };
     
-    const handleFileChange = (e, imageIndex) => {
-        const file = e.target.files[0];
-        setProductForm(prev => {
-            const newImages = [...prev.images];
-            newImages[imageIndex] = file;
-            return { ...prev, images: newImages };
-        });
+    const handleFileChange = (e) => {
+        // MODIFIED: This now handles multiple files from a single input
+        setProductForm(prev => ({ ...prev, images: Array.from(e.target.files) }));
     };
 
     const handleProductSubmit = async (e) => {
         e.preventDefault();
         
-        // Validation
-        const hasImages = productForm.images.some(img => img !== null);
-        if (!productForm.title.trim() || !productForm.price || (!hasImages && !editingProduct) ) {
-            alert('Please fill in all required fields (Title, Price, at least one Image)');
-            return;
-        }
-
-        // Validate variants
-        const hasValidVariants = productForm.variants.some(variant => 
-            variant.sku.trim() && variant.quantity > 0
-        );
-        if (!hasValidVariants) {
-            alert('Please provide at least one variant with SKU and quantity');
+        if (!productForm.title.trim() || !productForm.price || (productForm.images.length === 0 && !editingProduct)) {
+            alert('Title, Price, and at least one Image are required.');
             return;
         }
 
         const formData = new FormData();
-        // Append basic fields
-        formData.append('title', productForm.title.trim());
+        formData.append('title', productForm.title);
         formData.append('price', productForm.price);
-        formData.append('description', productForm.description.trim());
+        formData.append('description', productForm.description);
         formData.append('category', productForm.category);
+        formData.append('colors', JSON.stringify(productForm.colors.split(',').map(c => c.trim()).filter(Boolean)));
+        formData.append('variants', JSON.stringify(productForm.variants));
         
-        // Fix: Process colors correctly
-        const colorsArray = productForm.colors 
-            ? productForm.colors.split(',').map(c => c.trim()).filter(Boolean)
-            : [];
-        formData.append('colors', JSON.stringify(colorsArray));
-        
-        // Fix: Filter out empty variants and ensure proper data types
-        const validVariants = productForm.variants.filter(variant => 
-            variant.sku.trim() && variant.quantity >= 0
-        ).map(variant => ({
-            size: variant.size,
-            sku: variant.sku.trim(),
-            quantity: parseInt(variant.quantity) || 0
-        }));
-        
-        formData.append('variants', JSON.stringify(validVariants));
-        
-        // Handle multiple images
-        const validImages = productForm.images.filter(img => img !== null);
-        if (validImages.length > 0) {
-            // Send first image as 'image' for backward compatibility
-            formData.append('image', validImages[0]);
-        }
-        
-        // For demo purposes, store additional images in localStorage
-        // This is temporary until backend supports multiple images
-        if (validImages.length > 1) {
-            const imageUrls = [];
-            for (const image of validImages) {
-                const dataUrl = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.readAsDataURL(image);
-                });
-                imageUrls.push(dataUrl);
-            }
-            
-            // Store in localStorage with product title as key (temporary solution)
-            localStorage.setItem(`product_images_${productForm.title}`, JSON.stringify(imageUrls));
+        // MODIFIED: This loop appends all files with the correct field name: "images"
+        for (let i = 0; i < productForm.images.length; i++) {
+            formData.append('images', productForm.images[i]);
         }
 
         try {
             const url = editingProduct ? `/admin/products/${editingProduct.id}` : '/admin/products';
             const method = editingProduct ? 'PUT' : 'POST';
             await apiService.request(url, { method, body: formData });
+            
             alert(`Product ${editingProduct ? 'updated' : 'created'} successfully!`);
             resetProductForm();
             fetchData();
         } catch (error) {
             console.error('Error saving product:', error);
-            alert(`Error: Failed to save product. ${error.message || 'Please try again.'}`);
+            alert(`Error: ${error.message}`);
         }
     };
 
@@ -423,24 +374,24 @@ const AdminPanel = () => {
 
                                   <div>
                                       <label className="block text-sm font-medium mb-3">Product Images* (Upload up to 3 images)</label>
-                                      <div className="space-y-3">
-                                          {[0, 1, 2].map(index => (
-                                              <div key={index} className="flex items-center gap-3">
-                                                  <span className="text-sm font-medium text-gray-600 w-16">Image {index + 1}:</span>
-                                                  <input 
-                                                      id={`productImageInput_${index}`}
-                                                      type="file" 
-                                                      accept="image/*" 
-                                                      onChange={(e) => handleFileChange(e, index)} 
-                                                      className="flex-1 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                      required={index === 0 && !editingProduct}
-                                                  />
-                                                  {productForm.images[index] && (
-                                                      <span className="text-xs text-green-600 font-medium">✓ Selected</span>
-                                                  )}
-                                              </div>
-                                          ))}
-                                      </div>
+                                      <div>
+                                      <label htmlFor="productImageInput" className="block text-sm font-medium mb-3">Product Images* (Upload up to 3)</label>
+                                      <input 
+                                          id="productImageInput"
+                                          name="images" // This name must match what the backend expects
+                                          type="file" 
+                                          accept="image/*" 
+                                          multiple // This attribute allows multiple files to be selected
+                                          onChange={handleFileChange} 
+                                          className="w-full text-sm border border-gray-300 rounded-md file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                      />
+                                      {productForm.images.length > 0 && (
+                                          <p className="text-xs text-green-600 font-medium mt-2">
+                                              {productForm.images.length} image(s) selected.
+                                          </p>
+                                      )}
+                                      <p className="text-xs text-gray-500 mt-2">First image is required. Additional images are optional.</p>
+                                  </div>
                                       <p className="text-xs text-gray-500 mt-2">First image is required. Additional images are optional.</p>
                                   </div>
                                   <div className="flex flex-col sm:flex-row gap-2">

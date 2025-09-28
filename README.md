@@ -84,7 +84,6 @@ git clone https://github.com/hisham12334/full_ecommerse_site.git
 cd full_ecommerse_site
 ```
 
-### **2. Frontend Setup**
 ```bash
 # Install frontend dependencies
 npm install
@@ -93,37 +92,9 @@ npm install
 cp .env.example .env
 ```
 
-### **3. Backend Setup**
-```bash
-# Navigate to backend directory
-cd backend
-
-# Install backend dependencies
-npm install
-
-# Create backend environment file
-cp .env.example .env
-# Edit backend/.env and update JWT_SECRET for production
-```
-
-### **4. Database Setup**
-The SQLite database will be automatically created when you first run the backend server. Sample products are automatically seeded.
-
-### **5. Cloudinary Setup (Required for Image Upload)**
 ```bash
 # Add these to your backend/.env file
-CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-```
-
-**To get Cloudinary credentials:**
-1. Sign up at [cloudinary.com](https://cloudinary.com)
-2. Go to Dashboard
-3. Copy Cloud Name, API Key, and API Secret
-4. Add them to your backend/.env file
-
-### **6. Start the Application**
+# Full Stack Ecommerce Site
 
 **Terminal 1 - Backend Server:**
 ```bash
@@ -132,46 +103,11 @@ npm start
 # Server runs on http://localhost:5000
 ```
 
-**Terminal 2 - Frontend Development Server:**
-```bash
-npm run dev
-# Frontend runs on http://localhost:5173
-```
-
 ### **7. Access the Application**
 - **Frontend**: `http://localhost:5173`
 - **Backend API**: `http://localhost:5000/api`
-- **Admin Panel**: `http://localhost:5173/admin` (requires admin account)
-- **Health Check**: `http://localhost:5000/api/health`
-
-### **8. Admin Account Setup**
-To access the admin panel, you need an admin account:
-1. Register a regular user account
-2. Manually update the user's role in the database:
-   ```sql
-   UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
-   ```
-3. Or use the API endpoint (if you have admin access):
-   ```bash
-   PUT /api/admin/users/:id/role
-   Body: { "role": "admin" }
-   ```
-
-## 🏗️ Project Structure
 
 ```
-├── src/                        # Frontend Source Code
-│   ├── components/             # Modular UI Components
-│   │   ├── common/            # Reusable components
-│   │   │   ├── AdminRoute.jsx # Admin route protection component
-│   │   │   ├── Button/        # Button component with variants
-│   │   │   ├── Loading/       # Loading spinner component
-│   │   │   ├── Modal/         # Modal dialog component
-│   │   │   ├── ErrorBoundary/ # Error boundary wrapper
-│   │   │   └── Layout/        # Main layout with navigation
-│   │   ├── product/           # Product-specific components
-│   │   │   ├── ProductCard/   # Individual product card
-│   │   │   └── ProductGrid/   # Product grid layout
 │   │   └── forms/             # Form components (ready for expansion)
 │   ├── hooks/                 # Custom React Hooks
 │   │   ├── useAuth.js         # Authentication hook

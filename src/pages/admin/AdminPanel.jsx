@@ -81,7 +81,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                         <div className="bg-gray-50 rounded-lg overflow-hidden">
                             {order.items && order.items.length > 0 ? order.items.map((item, index) => (
                                 <div key={index} className="flex items-center p-4 border-b border-gray-200 last:border-b-0 bg-white mb-2 last:mb-0 rounded-lg mx-2 first:mt-2 last:mb-2">
-                                    <img src={item.image} alt={item.title} className="w-16 h-16 lg:w-20 lg:h-20 object-cover rounded-lg mr-4 flex-shrink-0 shadow-sm" />
+                                    <img src={item.image || ''} alt={item.title} className="w-16 h-16 lg:w-20 lg:h-20 object-cover rounded-lg mr-4 flex-shrink-0 shadow-sm" />
                                     <div className="flex-grow min-w-0">
                                         <p className="font-semibold text-sm lg:text-base text-gray-900 mb-1">{item.title}</p>
                                         <div className="space-y-1">

@@ -30,7 +30,7 @@ class OrderController {
             p.id as product_id,
             p.title,
             p.price,
-            p.image,
+            p.images,
             pv.id as variant_id,
             pv.size,
             pv.sku,
@@ -60,7 +60,7 @@ class OrderController {
             variant_id: dbProduct.variant_id,
             title: dbProduct.title,
             price: dbProduct.price, // Use price from DB
-            image: dbProduct.image,
+            image: (dbProduct.images && dbProduct.images.length > 0) ? dbProduct.images[0] : null,
             quantity: item.quantity,
             size: dbProduct.size,
             sku: dbProduct.sku,

@@ -250,7 +250,7 @@ export default function Checkout() {
                         <div className="space-y-4 mb-6">
                             {items.map((item) => (
                                 <div key={item.key} className="flex gap-4">
-                                    <img src={item.image} alt={item.title} className="w-16 h-16 object-cover" />
+                                    <img src={(item.images && item.images[0]) || item.image || ''} alt={item.title} className="w-16 h-16 object-cover" />
                                     <div className="flex-1">
                                         <h3 className="font-semibold text-sm text-gray-900">{item.title}</h3>
                                         <p className="text-sm text-gray-500">Qty: {item.quantity}</p>

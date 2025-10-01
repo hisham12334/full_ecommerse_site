@@ -278,7 +278,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                   transition={{ delay: product.id * 0.1 }}
                   className="group relative transition-transform duration-300 hover:scale-[1.02] active:scale-[1.02] cursor-pointer"
                 >
-                  <div className="aspect-square w-full overflow-hidden bg-gray-100">
+                  <div className="aspect-[3/4] w-full overflow-hidden bg-gray-100">
                     <Link to={`/product/${product.id}`}>
                       <img
                         src={(product.images && product.images[0]) || product.image || ''}

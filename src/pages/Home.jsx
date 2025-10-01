@@ -249,7 +249,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
 
         <section
           id="featured-products"
-          className="bg-brand-red-light text-white mt-16 pt-32 pb-16 sm:pt-40 sm:pb-24 [clip-path:polygon(0_10%,_100%_0,_100%_100%,_0%_100%)] overflow-hidden"
+          className="relative skewed-bg text-white mt-16 pt-32 pb-16 sm:pt-40 sm:pb-24"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">

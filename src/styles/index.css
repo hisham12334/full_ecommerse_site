@@ -8,4 +8,11 @@ html, body, #root {
   padding: 0;
   overflow-x: hidden;
 }
-
+.skewed-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #E54848; /* This is your brand-red-light color */
+  clip-path: polygon(0 10%, 100% 0, 100% 100%, 0% 100%);
+  z-index: -1;
+}

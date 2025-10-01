@@ -220,7 +220,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
         </>
       )}
 
-      <main className="w-full min-h-screen bg-gray-50">
+      <main className="w-full min-h-screen bg-gray-50 overflow-hidden">
         <HeroSection heroImages={heroImages} />
 
         <section className="py-4 bg-gray-50 border-y border-gray-200 overflow-hidden">
@@ -249,7 +249,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
 
         <section
           id="featured-products"
-          className="bg-brand-red-light text-white mt-16 pt-32 pb-16 sm:pt-40 sm:pb-24 [clip-path:polygon(0_10%,_100%_0,_100%_100%,_0%_100%)]"
+          className="bg-brand-red-light text-white mt-16 pt-32 pb-16 sm:pt-40 sm:pb-24 [clip-path:polygon(0_10%,_100%_0,_100%_100%,_0%_100%)] overflow-hidden"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">

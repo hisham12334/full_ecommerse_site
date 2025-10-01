@@ -249,9 +249,16 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
 
         <section
           id="featured-products"
-          className="bg-brand-red-light text-white py-16 sm:py-24"
+          className="relative overflow-hidden mt-16 text-white"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* This div is the skewed background. It doesn't contain any content. */}
+          <div 
+            className="absolute inset-0 bg-brand-red-light transform -skew-y-2 origin-top-right z-0"
+            aria-hidden="true"
+          ></div>
+
+          {/* This div holds all the content and sits on top of the background. */}
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 sm:pt-32 sm:pb-24">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
                 /Featured Products
@@ -261,16 +268,17 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
               </p>
             </div>
 
+            {/* The product grid is unchanged and will now scale correctly. */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 lg:gap-y-12">
               {topProducts.map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
+                  transition={{ delay: product.id * 0.1 }}
                   className="group relative transition-transform duration-300 hover:scale-[1.02] active:scale-[1.02] cursor-pointer"
                 >
-                  <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-100">
+                  <div className="aspect-square w-full overflow-hidden bg-gray-100">
                     <Link to={`/product/${product.id}`}>
                       <img
                         src={(product.images && product.images[0]) || product.image || ''}
@@ -296,7 +304,6 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
           </div>
         </section>
 
-        
         {/* Red Background Section to Fill Gap */}
         <section className="bg-brand-red py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

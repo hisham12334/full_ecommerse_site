@@ -249,9 +249,16 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
 
         <section
           id="featured-products"
-          className="relative skewed-bg text-white mt-16 pt-32 pb-16 sm:pt-40 sm:pb-24"
+          className="relative mt-16 overflow-hidden" // Use overflow-hidden on the container
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* This is the new, isolated background element */}
+          <div
+            className="absolute inset-0 bg-brand-red-light [clip-path:polygon(0_10%,_100%_0,_100%_100%,_0%_100%)] z-0"
+            aria-hidden="true"
+          ></div>
+
+          {/* The content now sits on top and is not affected by the clip-path */}
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 sm:pt-40 sm:pb-24 text-white">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
                 /Featured Products
@@ -288,8 +295,7 @@ export default function Home({ products = [], heroImages = [], brandLogoUrl }) {
                         <img
                           src={(product.images && product.images[0]) || product.image || ''}
                           alt={product.title}
-                          className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-110 group-active:scale-110 hover:scale-110 active:scale-110 touch-manipulation"
-                           // Add this line
+                          className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-110 group-active:scale-110 touch-manipulation"
                         />
                       </Link>
                     </div>

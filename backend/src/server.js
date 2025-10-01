@@ -24,12 +24,29 @@ async function startServer() {
   const PORT = process.env.PORT || 5000;
 
   // 3. Configure middleware
- // New, more robust code
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://full-ecommerse-site.vercel.app' 
+];
+
 const corsOptions = {
-  origin: [
-    'http://localhost:5173', 
-    'https://full-ecommerse-site.vercel.app'
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl)
+    if (!origin) return callback(null, true);
+
+    // Allow from the main list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow any Vercel preview URL from your project
+    if (origin.endsWith('-hishams-projects-8e70a3e1.vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Block all other origins
+    callback(new Error('Not allowed by CORS'));
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 204

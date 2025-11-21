@@ -1,95 +1,61 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-import { useProductsContext } from './context/ProductContext';
+import { ProductProvider } from './context/ProductContext';
 import AdminRoute from './components/common/AdminRoute';
-import apiService from './services/api';
 import './styles/index.css';
 
-// Lazily import page components
+// Lazy Imports (Keeps the initial load fast)
 const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login')); 
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
-const ProductDetails = lazy(() => import('./pages/ProductDetails'));
 const AdminPanel = lazy(() => import('./pages/admin/AdminPanel'));
 const UserDashboard = lazy(() => import('./pages/UserDashboard'));
 
 function App() {
-  
-  const { products, isLoading, error } = useProductsContext();
-
-  // Fetch products on app startup
-  
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
-        </div>
-      </div>
-    );
-  }
+  // Note: We removed the global "isLoading" check here.
+  // Why? So the website loads instantly. The 'PurchaseSection' 
+  // handles its own loading state internally now.
 
   return (
     <AuthProvider>
       <CartProvider>
-        <Router>
-          <div className="min-h-screen bg-white">
-            {error && (
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-yellow-700">{error}</p>
-                  </div>
+        <ProductProvider> {/* Provides product data to the whole app */}
+          <Router>
+            <div className="min-h-screen bg-warm-white">
+              
+              {/* This handles the loading of the page files themselves */}
+              <Suspense fallback={
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
                 </div>
-              </div>
-            )}
-            
-            <Suspense fallback={
-              <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
-              </div>
-            }>
-              <Routes>
-                <Route 
-                  path="/" 
-                  element={
-                    <Home 
-                      products={products}
-                      heroImageUrl=""
-                      brandLogoUrl=""
-                    />
-                  } 
-                />
-                <Route 
-                  path="/product/:id" 
-                  element={<ProductDetails products={products} />} 
-                />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/dashboard" element={<UserDashboard />} />
-                
-                {/* Admin Route */}
-                <Route 
-                  path="/admin"
-                  element={
-                    <AdminRoute>
-                      <AdminPanel />
-                    </AdminRoute>
-                  } 
-                />
-              </Routes>
-            </Suspense>
-          </div>
-        </Router>
+              }>
+                <Routes>
+                  {/* --- Public Routes --- */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  
+                  {/* --- Protected Routes --- */}
+                  <Route path="/dashboard" element={<UserDashboard />} />
+                  
+                  {/* Admin Route */}
+                  <Route 
+                    path="/admin"
+                    element={
+                      <AdminRoute>
+                        <AdminPanel />
+                      </AdminRoute>
+                    } 
+                  />
+                </Routes>
+              </Suspense>
+            </div>
+          </Router>
+        </ProductProvider>
       </CartProvider>
     </AuthProvider>
   );

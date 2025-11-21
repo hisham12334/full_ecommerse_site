@@ -1,107 +1,115 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
 const CartContext = createContext();
 
-const cartReducer = (state, action) => {
-  switch (action.type) {
-    case 'ADD_TO_CART':
-      const itemKey = `${action.payload.id}-${action.payload.selectedSize}-${action.payload.selectedColor}`;
-      const existingItem = state.items.find(item => item.key === itemKey);
+export function CartProvider({ children }) {
+  const [items, setItems] = useState(() => {
+    const saved = localStorage.getItem('cart');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-      if (existingItem) {
-        return {
-          ...state,
-          items: state.items.map(item =>
-            item.key === itemKey
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          ),
-        };
-      }
-      return {
-        ...state,
-        items: [...state.items, { ...action.payload, quantity: 1, key: itemKey }],
-      };
-
-    case 'REMOVE_FROM_CART':
-      return {
-        ...state,
-        items: state.items.filter(item => item.key !== action.payload),
-      };
-
-    case 'UPDATE_QUANTITY':
-      return {
-        ...state,
-        items: state.items.map(item =>
-          item.key === action.payload.key
-            ? { ...item, quantity: Math.max(0, action.payload.quantity) }
-            : item
-        ).filter(item => item.quantity > 0),
-      };
-
-    case 'CLEAR_CART':
-      return {
-        ...state,
-        items: [],
-      };
-
-    default:
-      return state;
-  }
-};
-
-export const CartProvider = ({ children }) => {
-    const [state, dispatch] = useReducer(cartReducer, {
-    items: JSON.parse(sessionStorage.getItem('cart') || '[]')
-    });
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(items));
+  }, [items]);
 
   const addToCart = (product) => {
-    dispatch({ type: 'ADD_TO_CART', payload: product });
+    // Support both old signature (product, size, color) and new signature (product object with all fields)
+    const isNewFormat = product.variant_id !== undefined;
+    
+    const key = isNewFormat 
+      ? `${product.id}-${product.selectedSize}-${product.selectedColor}`
+      : `${product.id}-${arguments[1]}-${arguments[2]}`;
+    
+    setItems(prevItems => {
+      const existingItem = prevItems.find(item => item.key === key);
+      
+      if (existingItem) {
+        return prevItems.map(item =>
+          item.key === key
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      
+      // New format: product object already has all fields
+      if (isNewFormat) {
+        return [...prevItems, {
+          key,
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          image: product.image,
+          variant_id: product.variant_id,
+          selectedSize: product.selectedSize,
+          selectedColor: product.selectedColor,
+          quantity: product.quantity || 1
+        }];
+      }
+      
+      // Old format: separate parameters
+      return [...prevItems, {
+        key,
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        selectedSize: arguments[1],
+        selectedColor: arguments[2],
+        quantity: 1
+      }];
+    });
   };
 
-  const removeFromCart = (productKey) => {
-    dispatch({ type: 'REMOVE_FROM_CART', payload: productKey });
+  const removeFromCart = (key) => {
+    setItems(prevItems => prevItems.filter(item => item.key !== key));
   };
 
-  const updateQuantity = (productKey, quantity) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { key: productKey, quantity } });
+  const updateQuantity = (key, newQuantity) => {
+    if (newQuantity < 1) {
+      removeFromCart(key);
+      return;
+    }
+    
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.key === key
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
+  };
+
+  const getCartTotal = () => {
+    return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const getCartCount = () => {
+    return items.reduce((count, item) => count + item.quantity, 0);
   };
 
   const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' });
-  };
-    useEffect(() => {
-    sessionStorage.setItem('cart', JSON.stringify(state.items));
-    }, [state.items]);
-
-  const getCartTotal = () => {
-    return state.items.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
-
-  const getCartItemsCount = () => {
-    return state.items.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const value = {
-    items: state.items,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    getCartTotal,
-    getCartItemsCount,
+    setItems([]);
   };
 
   return (
-    <CartContext.Provider value={value}>
+    <CartContext.Provider value={{
+      items,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      getCartTotal,
+      getCartCount,
+      clearCart
+    }}>
       {children}
     </CartContext.Provider>
   );
-};
+}
 
-export const useCart = () => {
+export function useCart() {
   const context = useContext(CartContext);
   if (!context) {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-};
+}

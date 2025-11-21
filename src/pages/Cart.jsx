@@ -1,155 +1,166 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import Button from '../components/common/Button';
+import { Trash2, ArrowRight, Minus, Plus, ShoppingBag } from 'lucide-react';
 
 export default function Cart() {
   const { user } = useAuth();
-  const { items, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+  const { items, removeFromCart, updateQuantity, getCartTotal } = useCart();
   const navigate = useNavigate();
   
-  const subtotal = getCartTotal();
-  const shipping = subtotal >= 999 ? 0 : 99;
+  // Debugging: Check what is actually in the cart
+  useEffect(() => {
+    console.log("Cart Items:", items);
+  }, [items]);
+
+  // Safety: Ensure calculations don't crash
+  const subtotal = getCartTotal ? getCartTotal() : 0;
+  const shipping = 0;
   const total = subtotal + shipping;
 
-  if (items.length === 0) {
-    return (
-      <div className="min-h-screen bg-white">
-        {/* Header */}
-        <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-               <Link to="/" className="font-bold text-xl tracking-wide text-action-black">Brand</Link>
-            </div>
-          </div>
-        </header>
+  // Safety: Ensure items is always an array
+  const safeItems = Array.isArray(items) ? items : [];
 
-        {/* Empty cart */}
-        <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Your Basket is Empty</h1>
-          <p className="text-gray-500 mb-8">Looks like you haven't added anything to your basket yet.</p>
-          <Button onClick={() => navigate('/')} size="lg">Continue Shopping</Button>
-        </div>
+  if (safeItems.length === 0) {
+    return (
+      <div className="min-h-screen bg-warm-white flex flex-col items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <ShoppingBag className="w-16 h-16 text-warm-grey mx-auto mb-6 opacity-50" />
+          <h1 className="font-serif text-3xl text-charcoal mb-4">Your Cart is Empty</h1>
+          <p className="font-sans text-warm-grey mb-8">The collection awaits.</p>
+          <button 
+            onClick={() => navigate('/')} 
+            className="border-b border-charcoal text-charcoal pb-1 hover:opacity-70 transition-opacity uppercase tracking-widest text-sm"
+          >
+            Return to Collection
+          </button>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-               <Link to="/" className="font-bold text-xl tracking-wide text-action-black">Brand</Link>
-            </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-warm-white pt-24 pb-12 px-4 sm:px-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="font-serif text-4xl text-charcoal mb-12">Your Selection</h1>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-extrabold text-action-black">Your Basket</h1>
-          <button
-            onClick={clearCart}
-            className="text-sm text-red-600 hover:text-red-800 font-medium"
-          >
-            Clear Basket
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Cart Items */}
-          <div className="md:col-span-2 space-y-4">
-            {items.map((item) => (
-              <motion.div
-                key={item.key}
-                layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, x: -50 }}
-                className="flex gap-4 p-4 bg-white border border-gray-200"
-              >
-                <img
-                  src={(item.images && item.images[0]) || item.image}
-                  alt={item.title}
-                  className="w-24 h-24 object-cover"
-                />
-                <div className="flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{item.title}</h3>
-                    <p className="text-sm text-gray-500">
-                      {item.selectedSize && `Size: ${item.selectedSize}`} 
-                      {item.selectedSize && item.selectedColor && ` / `}
-                      {item.selectedColor && `Color: ${item.selectedColor}`}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4 mt-2">
-                    <div className="flex items-center border border-gray-300">
-                      <button
-                        onClick={() => updateQuantity(item.key, item.quantity - 1)}
-                        className="px-2 py-1 hover:bg-gray-100"
-                      >
-                        -
-                      </button>
-                      <span className="px-3 text-sm font-medium">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.key, item.quantity + 1)}
-                        className="px-2 py-1 hover:bg-gray-100"
-                      >
-                        +
-                      </button>
+          <div className="lg:col-span-2 space-y-8">
+            <AnimatePresence>
+              {safeItems.map((item, index) => {
+                // Defensive Check: Skip bad items without crashing
+                if (!item || !item.id) return null;
+
+                // Safe Values
+                const title = item.title || "Product";
+                const price = parseFloat(item.price) || 0;
+                const size = item.selectedSize || "N/A";
+                const color = item.selectedColor || "Standard";
+                const imgUrl = item.image || "/placeholder.svg";
+
+                return (
+                  <motion.div
+                    key={item.key || `cart-item-${index}`}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex gap-6 border-b border-warm-grey/20 pb-8"
+                  >
+                    <div className="w-24 h-32 bg-cool-white overflow-hidden rounded-sm flex-shrink-0">
+                      <img
+                        src={imgUrl}
+                        alt={title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
                     </div>
-                    <button
-                      onClick={() => removeFromCart(item.key)}
-                      className="text-red-600 hover:underline text-sm font-medium"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-md">₹{(item.price * item.quantity).toLocaleString()}</p>
-                </div>
-              </motion.div>
-            ))}
+                    
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <h3 className="font-serif text-xl text-charcoal leading-tight pr-4">{title}</h3>
+                          <p className="font-mono text-sm text-charcoal whitespace-nowrap">
+                            ₹{price.toLocaleString()}
+                          </p>
+                        </div>
+                        <p className="font-sans text-sm text-warm-grey mt-2">
+                          Size: {size} | {color}
+                        </p>
+                      </div>
+
+                      <div className="flex justify-between items-end mt-4">
+                        <div className="flex items-center gap-4 border border-warm-grey/30 px-3 py-1 bg-white">
+                          <button 
+                            onClick={() => updateQuantity(item.key, (item.quantity || 1) - 1)}
+                            className="text-charcoal hover:text-warm-grey transition-colors"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="font-mono text-sm w-4 text-center">{item.quantity || 1}</span>
+                          <button 
+                            onClick={() => updateQuantity(item.key, (item.quantity || 1) + 1)}
+                            className="text-charcoal hover:text-warm-grey transition-colors"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                        
+                        <button
+                          onClick={() => removeFromCart(item.key)}
+                          className="text-warm-grey hover:text-red-400 transition-colors p-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
 
-          {/* Order Summary */}
-          <div className="md:col-span-1 sticky top-24">
-            <div className="bg-white p-6 border border-gray-200">
-              <h2 className="text-lg font-semibold mb-4 border-b pb-2">Order Summary</h2>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal</span>
+          {/* Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-cool-white p-8 sticky top-24 border border-warm-grey/10 rounded-sm">
+              <h2 className="font-serif text-2xl text-charcoal mb-6">Summary</h2>
+              
+              <div className="space-y-4 mb-8 font-sans text-sm">
+                <div className="flex justify-between text-warm-grey">
+                  <span>Subtotal</span>
                   <span>₹{subtotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Shipping</span>
-                  <span>₹{shipping}</span>
+                <div className="flex justify-between text-warm-grey">
+                  <span>Shipping</span>
+                  <span>{shipping === 0 ? 'Complimentary' : `₹${shipping}`}</span>
                 </div>
-                <div className="border-t border-gray-200 pt-3 mt-3">
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>₹{total.toLocaleString()}</span>
-                  </div>
+                <div className="border-t border-warm-grey/20 pt-4 flex justify-between text-charcoal font-medium text-base">
+                  <span>Total</span>
+                  <span>₹{total.toLocaleString()}</span>
                 </div>
               </div>
-              <div className="mt-6">
-                <Button
-                  onClick={() => {
-                      if (!user) {
-                        alert('Please sign in to proceed to checkout');
-                        return;
-                      }
-                      navigate('/checkout');
-                  }}
-                  className="w-full"
-                  size="lg"
-                >
-                  Proceed to Checkout
-                </Button>
-              </div>
+
+              <button
+                onClick={() => {
+                    if (!user) {
+                      alert('Please sign in to complete your reservation.');
+                      navigate('/login');
+                      return;
+                    }
+                    navigate('/checkout');
+                }}
+                className="w-full bg-charcoal text-white py-4 uppercase tracking-widest hover:bg-black transition-colors flex items-center justify-center gap-2 group text-sm font-medium"
+              >
+                Proceed to Checkout
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
           </div>
         </div>

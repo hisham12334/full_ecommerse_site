@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useOrders } from '../hooks/useOrders';
 import { formatDate } from '../services/utils/formatting';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
+import { LogOut, Home } from 'lucide-react';
 
 // A simple loading spinner component
 const Spinner = () => (
@@ -12,7 +13,7 @@ const Spinner = () => (
 );
 
 export default function UserDashboard() {
-  const { user, isInitializing } = useAuth();
+  const { user, isInitializing, logout } = useAuth();
   const { orders, loading: ordersLoading, error: ordersError } = useOrders();
   const [activeTab, setActiveTab] = useState('orders');
 
@@ -53,6 +54,20 @@ export default function UserDashboard() {
                   className={`w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'profile' ? 'bg-red-500 text-white' : 'text-gray-300 hover:bg-red-500/20 hover:text-white'}`}
                 >
                   Profile
+                </button>
+                <Link
+                  to="/"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-red-500/20 hover:text-white transition-colors"
+                >
+                  <Home className="w-4 h-4" />
+                  Back to Home
+                </Link>
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
                 </button>
               </nav>
             </div>

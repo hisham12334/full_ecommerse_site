@@ -1,16 +1,34 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  const { user } = useAuth();
+  
+  // Get cart key based on user (user-specific cart or guest cart)
+  const getCartKey = () => {
+    return user ? `cart_user_${user.id}` : 'cart_guest';
+  };
+
   const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem('cart');
+    const cartKey = user ? `cart_user_${user.id}` : 'cart_guest';
+    const saved = localStorage.getItem(cartKey);
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Update cart in localStorage whenever items change
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(items));
-  }, [items]);
+    const cartKey = getCartKey();
+    localStorage.setItem(cartKey, JSON.stringify(items));
+  }, [items, user]);
+
+  // Clear cart when user changes (login/logout)
+  useEffect(() => {
+    const cartKey = getCartKey();
+    const saved = localStorage.getItem(cartKey);
+    setItems(saved ? JSON.parse(saved) : []);
+  }, [user?.id]);
 
   const addToCart = (product) => {
     // Support both old signature (product, size, color) and new signature (product object with all fields)

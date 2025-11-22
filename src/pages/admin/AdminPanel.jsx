@@ -1,7 +1,8 @@
 // src/pages/admin/AdminPanel.jsx
 
 import React, { useState, useEffect } from 'react';
-import { Eye, Package, Users, ShoppingBag, TrendingUp, X, Edit2, Trash2 } from 'lucide-react';
+import { Eye, Package, Users, ShoppingBag, TrendingUp, X, Edit2, Trash2, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import apiService from '../../services/api';
 
 // Enhanced Modal component for viewing order details with better mobile scaling
@@ -123,6 +124,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
 };
 
 const AdminPanel = () => {
+    const { logout, user } = useAuth();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
@@ -276,9 +278,18 @@ const AdminPanel = () => {
           <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
           
           {/* Mobile Navigation */}
-          <nav className="lg:w-64 bg-white shadow-md lg:flex-shrink-0">
-              <div className="p-4">
-                  <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4">Admin Panel</h1>
+          <nav className="lg:w-64 bg-white shadow-md lg:flex-shrink-0 flex flex-col">
+              <div className="p-4 flex-1">
+                  <div className="flex items-center justify-between mb-4">
+                      <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Admin Panel</h1>
+                  </div>
+                  
+                  {user && (
+                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                          <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                  )}
                   
                   {/* Mobile: Horizontal scroll navigation */}
                   <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
@@ -295,6 +306,17 @@ const AdminPanel = () => {
                           </button>
                       ))}
                   </div>
+              </div>
+              
+              {/* Logout Button */}
+              <div className="p-4 border-t border-gray-200">
+                  <button
+                      onClick={logout}
+                      className="w-full flex items-center justify-center px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                      <LogOut className="w-5 h-5 mr-2" />
+                      <span className="text-sm font-medium">Logout</span>
+                  </button>
               </div>
           </nav>
 

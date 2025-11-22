@@ -91,11 +91,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear everything from storage
+    // Clear user-specific cart from localStorage
+    if (user) {
+      localStorage.removeItem(`cart_user_${user.id}`);
+    }
+    
+    // Clear auth data
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-    sessionStorage.removeItem('cart'); // This is the key line
+    
     setUser(null);
+    
     // Force a reload to ensure all state is reset cleanly
     window.location.href = '/'; 
   };

@@ -1,10 +1,14 @@
 import { motion } from 'framer-motion';
 import React from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import heroImage from '@/assets/images/hero-hoodie.jpg';
 
 const HeroSection = () => {
+  const { user, logout } = useAuth();
+  const [showDropdown, setShowDropdown] = React.useState(false);
+
   return (
     <section className="relative h-screen w-full overflow-hidden bg-warm-white">
       {/* Background Image */}
@@ -34,12 +38,55 @@ const HeroSection = () => {
 
       {/* Login / Account Link - Top Right */}
       <div className="absolute right-8 top-8 z-20">
-        <Link // <--- 2. Change 'a' to 'Link'
-          to="/login" // <--- 3. Change 'href' to 'to'
-          className="font-sans text-sm tracking-widest uppercase text-charcoal hover:text-black transition-colors border-b border-transparent hover:border-charcoal pb-1"
-        >
-          Account
-        </Link>
+        {user ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="flex items-center gap-2 font-sans text-sm tracking-widest uppercase text-charcoal hover:text-black transition-colors"
+            >
+              <User className="w-4 h-4" />
+              {user.name}
+            </button>
+            
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-warm-grey/20 py-2">
+                {user.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    className="block px-4 py-2 text-sm text-charcoal hover:bg-warm-white transition-colors"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+                <Link
+                  to="/dashboard"
+                  className="block px-4 py-2 text-sm text-charcoal hover:bg-warm-white transition-colors"
+                  onClick={() => setShowDropdown(false)}
+                >
+                  My Orders
+                </Link>
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    logout();
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link
+            to="/login"
+            className="font-sans text-sm tracking-widest uppercase text-charcoal hover:text-black transition-colors border-b border-transparent hover:border-charcoal pb-1"
+          >
+            Account
+          </Link>
+        )}
       </div>
       
       {/* Center Statement */}

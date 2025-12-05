@@ -32,37 +32,67 @@ const StorySection = () => {
   ];
 
   return (
-    <section ref={containerRef} className="relative min-h-[200vh] bg-gradient-to-b from-warm-white to-cool-white">
-      <div className="sticky top-0 grid h-screen grid-cols-1 lg:grid-cols-5">
-        {/* Sticky Image - Left */}
-        <motion.div
-          className="relative col-span-3 overflow-hidden"
-          style={{ y: imageY }}
-        >
-          <img
-            src={heroImage}
-            alt="Hoodie craftsmanship detail"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-charcoal/10" />
-        </motion.div>
+    <>
+      {/* Desktop Version - Original sticky layout */}
+      <section ref={containerRef} className="relative hidden lg:block min-h-[200vh] bg-gradient-to-b from-warm-white to-cool-white">
+        <div className="sticky top-0 grid h-screen grid-cols-5">
+          {/* Sticky Image - Left */}
+          <motion.div
+            className="relative col-span-3 overflow-hidden"
+            style={{ y: imageY }}
+          >
+            <img
+              src={heroImage}
+              alt="Hoodie craftsmanship detail"
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-charcoal/10" />
+          </motion.div>
 
-        {/* Scrolling Text - Right */}
-        <div className="col-span-2 flex items-center bg-cool-white p-12 lg:p-16">
-          <div className="space-y-16">
+          {/* Scrolling Text - Right */}
+          <div className="col-span-2 flex items-center bg-cool-white p-16">
+            <div className="space-y-16">
+              {stories.map((story, index) => (
+                <StoryBlock key={index} {...story} index={index} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile Version - Simple stacked layout */}
+      <section className="lg:hidden bg-gradient-to-b from-warm-white to-cool-white py-16">
+        <div className="container mx-auto px-6">
+          {/* Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-12 overflow-hidden rounded-lg"
+          >
+            <img
+              src={heroImage}
+              alt="Hoodie craftsmanship detail"
+              className="w-full h-[400px] object-cover"
+            />
+          </motion.div>
+
+          {/* Story Blocks */}
+          <div className="space-y-12">
             {stories.map((story, index) => (
               <StoryBlock key={index} {...story} index={index} />
             ))}
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 
 const StoryBlock = ({ title, text, index }: { title: string; text: string; index: number }) => {
   const [ref, inView] = useInView({
-    threshold: 0.6,
+    threshold: 0.3,
     triggerOnce: false
   });
 
@@ -72,10 +102,10 @@ const StoryBlock = ({ title, text, index }: { title: string; text: string; index
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : { opacity: 0.3, y: 20 }}
       transition={{ duration: 0.8, delay: index * 0.1 }}
-      className="space-y-4"
+      className="space-y-3 lg:space-y-4"
     >
-      <h3 className="font-serif text-4xl font-semibold text-charcoal">{title}</h3>
-      <p className="font-sans text-lg leading-relaxed text-warm-grey">{text}</p>
+      <h3 className="font-serif text-3xl lg:text-4xl font-semibold text-charcoal">{title}</h3>
+      <p className="font-sans text-base lg:text-lg leading-relaxed text-warm-grey">{text}</p>
     </motion.div>
   );
 };

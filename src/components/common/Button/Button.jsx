@@ -14,11 +14,11 @@ const Button = ({
 
   // Variants updated with a new 'success' state
   const variants = {
-    primary: 'bg-action-black text-white hover:bg-gray-800 focus:ring-black',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-action-black',
-    success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500'
+    primary: 'bg-black text-white focus:ring-black',
+    secondary: 'bg-gray-200 text-gray-900 focus:ring-gray-500',
+    danger: 'bg-red-600 text-white focus:ring-red-500',
+    outline: 'border border-gray-300 text-gray-700 focus:ring-black',
+    success: 'bg-green-600 text-white focus:ring-green-500'
   };
 
   const sizes = {

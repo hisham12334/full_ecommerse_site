@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import fabricImage from '@/assets/images/fabric-macro.jpg';
+import fabricImage1 from '@/assets/images/fabric-macro1.jpg';
+import fabricImage2 from '@/assets/images/fabric-macro2.jpg';
+import fabricImage3 from '@/assets/images/fabric-macro3.jpg';
 
 const MaterialSection = () => {
   const [ref1, inView1] = useInView({ threshold: 0.3, triggerOnce: true });
@@ -44,7 +47,7 @@ const MaterialSection = () => {
             className="col-span-1 overflow-hidden rounded-sm"
           >
             <img 
-              src={fabricImage} 
+              src={fabricImage1} 
               alt="Fabric macro detail"
               className="h-full w-full object-cover"
             />
@@ -66,7 +69,7 @@ const MaterialSection = () => {
             className="col-span-1 overflow-hidden rounded-sm lg:translate-y-8"
           >
             <img 
-              src={fabricImage} 
+              src={fabricImage2} 
               alt="Cotton weave structure"
               className="h-full w-full object-cover brightness-110"
             />
@@ -88,7 +91,7 @@ const MaterialSection = () => {
             className="col-span-1 overflow-hidden rounded-sm md:col-span-2 lg:col-span-1 lg:-translate-y-4"
           >
             <img 
-              src={fabricImage} 
+              src={fabricImage3} 
               alt="Industrial knitting detail"
               className="h-full w-full object-cover brightness-90"
             />

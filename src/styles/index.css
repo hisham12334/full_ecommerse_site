@@ -47,10 +47,10 @@ All colors MUST be HSL.
     --warm-grey: 0 0% 47%;
     --fabric-texture: 0 0% 15%;
 
-    /* Typography */
-    --font-serif: 'Playfair Display', serif;
-    --font-sans: 'Inter', sans-serif;
-    --font-mono: 'Space Mono', monospace;
+    /* Typography System */
+    --font-serif: 'Cormorant', serif; /* Headlines - Luxury, editorial, premium */
+    --font-sans: 'Inter', sans-serif; /* Body, UI - Clean, modern, balanced */
+    --font-mono: 'Inter', sans-serif; /* Labels - Minimal, classy retail aesthetic */
 
     /* Animation */
     --transition-slow: 1s cubic-bezier(0.6, 0.05, 0.01, 0.9);
@@ -116,6 +116,7 @@ All colors MUST be HSL.
     scroll-behavior: smooth;
   }
 
+  /* Headlines - Luxury, editorial, premium feeling */
   h1,
   h2,
   h3,
@@ -123,10 +124,15 @@ All colors MUST be HSL.
   h5,
   h6 {
     font-family: var(--font-serif);
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.02em;
   }
 
+  h1 {
+    font-weight: 600;
+  }
+
+  /* Typography utility classes */
   .font-serif {
     font-family: var(--font-serif);
   }
@@ -137,6 +143,21 @@ All colors MUST be HSL.
 
   .font-mono {
     font-family: var(--font-mono);
+  }
+
+  /* Label style - Minimal, classy retail aesthetic */
+  .label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  /* Button text style */
+  button {
+    font-family: var(--font-sans);
+    letter-spacing: 0.05em;
   }
 }
 

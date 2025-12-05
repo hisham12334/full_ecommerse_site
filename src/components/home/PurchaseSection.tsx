@@ -129,6 +129,14 @@ const PurchaseSection = () => {
             </p>
           </div>
 
+          {/* Temperature Range */}
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <div className="h-1 w-32 rounded-full bg-gradient-to-r from-blue-200 via-warm-grey to-orange-200" />
+              <p className="font-mono text-xs text-warm-grey">
+                Comfort Range: 45°F - 65°F
+              </p>
+            </div>
+
           {/* Price */}
           <div className="mb-8">
             <p className="font-serif text-5xl font-semibold text-charcoal">

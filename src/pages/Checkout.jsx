@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import apiService from '../services/api';
-import Button from '../components/common/Button';
+import Button from '../components/common/Button/Button';
 
 const loadScript = (src) => {
     return new Promise((resolve) => {
@@ -23,6 +23,8 @@ export default function Checkout() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderComplete, setOrderComplete] = useState(false);
     const [razorpayReady, setRazorpayReady] = useState(false);
+    const [stockErrors, setStockErrors] = useState([]);
+    const [checkingStock, setCheckingStock] = useState(true);
 
     const [formData, setFormData] = useState({
         email: user?.email || '',
@@ -43,6 +45,45 @@ export default function Checkout() {
             setRazorpayReady(res);
         });
     }, []);
+
+    // Check stock availability on page load
+    useEffect(() => {
+        const checkStockAvailability = async () => {
+            setCheckingStock(true);
+            const stockIssues = [];
+
+            try {
+                // Check each item's stock
+                for (const item of items) {
+                    try {
+                        // Use item.id as the product_id
+                        const product = await apiService.getProduct(item.id);
+                        const variant = product.variants?.find(v => v.id === item.variant_id);
+                        
+                        if (!variant || variant.stock < item.quantity) {
+                            stockIssues.push({
+                                title: item.title,
+                                requested: item.quantity,
+                                available: variant?.stock || 0
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error checking stock for ${item.title}:`, error);
+                    }
+                }
+                
+                setStockErrors(stockIssues);
+            } catch (error) {
+                console.error('Error checking stock:', error);
+            } finally {
+                setCheckingStock(false);
+            }
+        };
+
+        if (items.length > 0) {
+            checkStockAvailability();
+        }
+    }, [items]);
 
     const subtotal = getCartTotal();
     const shipping = subtotal >= 999 ? 0 : 99;
@@ -182,7 +223,7 @@ export default function Checkout() {
                  <header className="border-b border-gray-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-center h-16">
-                            <Link to="/" className="font-bold text-xl tracking-wide text-action-black">Brand</Link>
+                            <Link to="/" className="font-serif text-2xl tracking-wider text-charcoal">Qadr.fits</Link>
                         </div>
                     </div>
                 </header>
@@ -202,12 +243,45 @@ export default function Checkout() {
             <header className="border-b border-gray-100">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-center h-16">
-                        <Link to="/" className="font-bold text-xl tracking-wide text-action-black">Brand</Link>
+                        <Link to="/" className="font-serif text-2xl tracking-wider text-charcoal">Qadr.fits</Link>
                     </div>
                 </div>
             </header>
             <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
-                <h1 className="text-3xl font-extrabold text-action-black mb-8 text-center">Checkout</h1>
+                <h1 className="text-3xl font-extrabold text-black mb-8 text-center">Checkout</h1>
+                
+                {/* Stock Availability Warning */}
+                {!checkingStock && stockErrors.length > 0 && (
+                    <div className="mb-6 bg-red-50 border border-red-200 rounded p-4">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3 flex-1">
+                                <h3 className="text-sm font-semibold text-red-800">Items Unavailable</h3>
+                                <div className="mt-2 text-sm text-red-700">
+                                    <p className="mb-2">The following items are out of stock or have insufficient quantity:</p>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        {stockErrors.map((error, index) => (
+                                            <li key={index}>
+                                                <span className="font-medium">{error.title}</span> - Requested: {error.requested}, Available: {error.available}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <p className="mt-3">Please update your cart before proceeding.</p>
+                                </div>
+                                <div className="mt-4">
+                                    <Button onClick={() => navigate('/cart')} variant="danger" size="sm">
+                                        Update Cart
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div>
                         <form onSubmit={handleSubmit} className="space-y-6">
@@ -235,13 +309,19 @@ export default function Checkout() {
                                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h2>
                                 <div className="space-y-3">
                                     <RadioInput label="Card / UPI / Netbanking" name="paymentMethod" value="card" checked={formData.paymentMethod === 'card'} onChange={handleInputChange} />
-                                    <RadioInput label="Cash on Delivery" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleInputChange} />
+                                    <RadioInput label="Cash on Delivery (Coming Soon)" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleInputChange} disabled={true} />
                                 </div>
                             </div>
 
-                            <Button type="submit" disabled={isProcessing} className="w-full" size="lg">
-                                {isProcessing ? 'Processing...' : `Complete Order - ₹${total.toLocaleString()}`}
+                            <Button type="submit" disabled={isProcessing || stockErrors.length > 0 || checkingStock} className="w-full" size="lg">
+                                {checkingStock ? 'Checking availability...' : isProcessing ? 'Processing...' : `Complete Order - ₹${total.toLocaleString()}`}
                             </Button>
+                            
+                            {stockErrors.length > 0 && (
+                                <p className="text-sm text-red-600 text-center mt-2">
+                                    Please resolve stock issues before completing your order
+                                </p>
+                            )}
                         </form>
                     </div>
 
@@ -286,9 +366,9 @@ const InputField = ({ label, name, value, onChange, error, type = 'text' }) => (
     </div>
 );
 
-const RadioInput = ({ label, name, value, checked, onChange }) => (
-    <label className="flex items-center p-3 border border-gray-300 has-[:checked]:bg-gray-100 has-[:checked]:border-gray-500 cursor-pointer">
-        <input type="radio" name={name} value={value} checked={checked} onChange={onChange} className="h-4 w-4 text-action-black focus:ring-action-black" />
+const RadioInput = ({ label, name, value, checked, onChange, disabled = false }) => (
+    <label className={`flex items-center p-3 border border-gray-300 has-[:checked]:bg-gray-100 has-[:checked]:border-gray-500 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+        <input type="radio" name={name} value={value} checked={checked} onChange={onChange} disabled={disabled} className="h-4 w-4 text-black focus:ring-black" />
         <span className="ml-3 text-sm font-medium">{label}</span>
     </label>
 );

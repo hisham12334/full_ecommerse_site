@@ -3,27 +3,45 @@ import React from 'react';
 import { ChevronDown, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import heroImage from '@/assets/images/hero-hoodie.jpg';
 
 const HeroSection = () => {
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = React.useState(false);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  // Ensure video plays immediately
+  React.useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.log('Video autoplay failed:', error);
+      });
+    }
+  }, []);
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-warm-white">
-      {/* Background Image */}
+      {/* Background Video */}
       <motion.div
         className="absolute inset-0"
-        initial={{ scale: 1.1 }}
+        initial={{ scale: 1.05 }}
         animate={{ scale: 1 }}
         transition={{ duration: 1.5, ease: [0.6, 0.05, 0.01, 0.9] }}
       >
-        <img
-          src={heroImage}
-          alt="Premium heavyweight hoodie fabric detail"
-          className="h-full w-full object-cover opacity-90"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-warm-white/10 via-transparent to-warm-white/30" />
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="h-full w-full object-cover"
+          poster="/hero-poster.jpg"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+          <source src="/hero-video.webm" type="video/webm" />
+          {/* Fallback message for browsers that don't support video */}
+          Your browser does not support the video tag.
+        </video>
       </motion.div>
 
       {/* Brand Name - Top Left */}

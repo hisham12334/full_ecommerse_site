@@ -15,9 +15,13 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ['"Playfair Display"', 'serif'],
-        sans: ['Inter', 'sans-serif'],
-        mono: ['"Space Mono"', 'monospace'],
+        serif: ['Cormorant', 'serif'], // Luxury headlines
+        sans: ['Inter', 'sans-serif'], // Body and UI components
+        mono: ['Inter', 'sans-serif'], // Labels with caps + tracking
+      },
+      letterSpacing: {
+        'luxury': '0.02em',
+        'label': '0.1em', // For uppercase labels
       },
       colors: {
         // Merging your new premium colors

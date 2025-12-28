@@ -30,7 +30,7 @@ export function CartProvider({ children }) {
     setItems(saved ? JSON.parse(saved) : []);
   }, [user?.id]);
 
-  const addToCart = (product) => {
+  const addToCart = (product, stockLimit = null) => {
     // Support both old signature (product, size, color) and new signature (product object with all fields)
     const isNewFormat = product.variant_id !== undefined;
     
@@ -42,11 +42,24 @@ export function CartProvider({ children }) {
       const existingItem = prevItems.find(item => item.key === key);
       
       if (existingItem) {
+        const newQuantity = existingItem.quantity + 1;
+        
+        // Check stock limit if provided
+        if (stockLimit !== null && newQuantity > stockLimit) {
+          return prevItems; // Don't add if it would exceed stock
+        }
+        
         return prevItems.map(item =>
           item.key === key
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: newQuantity }
             : item
         );
+      }
+      
+      // For new items, check if initial quantity exceeds stock
+      const initialQuantity = product.quantity || 1;
+      if (stockLimit !== null && initialQuantity > stockLimit) {
+        return prevItems; // Don't add if initial quantity exceeds stock
       }
       
       // New format: product object already has all fields
@@ -60,7 +73,7 @@ export function CartProvider({ children }) {
           variant_id: product.variant_id,
           selectedSize: product.selectedSize,
           selectedColor: product.selectedColor,
-          quantity: product.quantity || 1
+          quantity: initialQuantity
         }];
       }
       
@@ -76,16 +89,27 @@ export function CartProvider({ children }) {
         quantity: 1
       }];
     });
+    
+    return { success: true, message: 'Item added to cart' };
   };
 
   const removeFromCart = (key) => {
     setItems(prevItems => prevItems.filter(item => item.key !== key));
   };
 
-  const updateQuantity = (key, newQuantity) => {
+  const updateQuantity = (key, newQuantity, stockLimit = null) => {
     if (newQuantity < 1) {
       removeFromCart(key);
-      return;
+      return { success: true, message: 'Item removed from cart' };
+    }
+    
+    // If stock limit is provided, validate against it
+    if (stockLimit !== null && newQuantity > stockLimit) {
+      return { 
+        success: false, 
+        message: `Only ${stockLimit} items available in stock`,
+        availableStock: stockLimit
+      };
     }
     
     setItems(prevItems =>
@@ -95,6 +119,8 @@ export function CartProvider({ children }) {
           : item
       )
     );
+    
+    return { success: true, message: 'Quantity updated successfully' };
   };
 
   const getCartTotal = () => {

@@ -22,37 +22,41 @@ async function startServer() {
 
   const app = express();
   const PORT = process.env.PORT || 5000;
+  app.set('trust proxy', 1);
 
   // 3. Configure middleware
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://full-ecommerse-site.vercel.app' 
-];
+  // backend/src/server.js
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'https://full-ecommerse-site.vercel.app',
+    'https://www.qadrfits.com', // <--- ADD THIS
+    'https://qadrfits.com'      // <--- ADD THIS
+  ];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl)
-    if (!origin) return callback(null, true);
+  const corsOptions = {
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl)
+      if (!origin) return callback(null, true);
 
-    // Allow from the main list
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+      // Allow from the main list
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-    // Allow any Vercel preview URL from your project
-    if (origin.endsWith('-hishams-projects-8e70a3e1.vercel.app')) {
-      return callback(null, true);
-    }
-    
-    // Block all other origins
-    callback(new Error('Not allowed by CORS'));
-  },
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true,
-  optionsSuccessStatus: 204
-};
+      // Allow any Vercel preview URL from your project
+      if (origin.endsWith('-hishams-projects-8e70a3e1.vercel.app')) {
+        return callback(null, true);
+      }
 
-app.use(cors(corsOptions));
+      // Block all other origins
+      callback(new Error('Not allowed by CORS'));
+    },
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+    optionsSuccessStatus: 204
+  };
+
+  app.use(cors(corsOptions));
   app.use(express.json());
 
   // 4. Configure routes

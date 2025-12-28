@@ -8,24 +8,25 @@ export const ProductProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const fetchedProducts = await apiService.getProducts();
-        setProducts(fetchedProducts);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch products:', err);
-        setError('Failed to load products. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      const fetchedProducts = await apiService.getProducts();
+      setProducts(fetchedProducts);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch products:', err);
+      setError('Failed to load products. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProducts();
   }, []);
 
-  const value = { products, isLoading, error };
+  const value = { products, isLoading, error, refreshProducts: fetchProducts };
 
   return (
     <ProductContext.Provider value={value}>

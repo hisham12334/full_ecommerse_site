@@ -42,6 +42,9 @@ const HeroSection = () => {
           {/* Fallback message for browsers that don't support video */}
           Your browser does not support the video tag.
         </video>
+        {/* Subtle Overlay for Legibility */}
+        <div className="absolute inset-0 bg-black/5" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
       </motion.div>
 
       {/* Brand Name - Top Left */}
@@ -65,7 +68,7 @@ const HeroSection = () => {
               <User className="w-4 h-4" />
               {user.name}
             </button>
-            
+
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-warm-grey/20 py-2">
                 {user.role === 'admin' && (
@@ -106,7 +109,7 @@ const HeroSection = () => {
           </Link>
         )}
       </div>
-      
+
       {/* Center Statement */}
       <div className="absolute inset-0 z-10 flex items-center justify-center">
         <motion.div
@@ -137,6 +140,23 @@ const HeroSection = () => {
         >
           <ChevronDown className="h-6 w-6 text-charcoal" />
         </motion.div>
+      </motion.div>
+
+      {/* Grab Button - Bottom Left */}
+      <motion.div
+        className="absolute left-8 bottom-12 z-10"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1.2, duration: 1 }}
+      >
+        <a
+          href="#shop"
+          className="group relative flex items-center gap-6 overflow-hidden border-2 border-charcoal bg-charcoal px-10 py-4 font-sans text-xs tracking-[0.3em] uppercase text-white transition-all duration-500 hover:text-charcoal"
+        >
+          <span className="relative z-10">Grab</span>
+          <span className="relative z-10 inline-block transition-transform duration-500 group-hover:translate-x-2">→</span>
+          <div className="absolute inset-0 z-0 translate-x-[-101%] bg-white transition-transform duration-500 group-hover:translate-x-0" />
+        </a>
       </motion.div>
     </section>
   );

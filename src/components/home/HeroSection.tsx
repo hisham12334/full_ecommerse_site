@@ -49,16 +49,16 @@ const HeroSection = () => {
 
       {/* Brand Name - Top Left */}
       <motion.div
-        className="absolute left-8 top-8 z-10"
+        className="absolute left-6 top-6 md:left-8 md:top-8 z-10"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.5, duration: 1 }}
       >
-        <h2 className="font-serif text-2xl tracking-wider text-charcoal">Qadr.fits</h2>
+        <h2 className="font-serif text-xl md:text-2xl tracking-wider text-charcoal">Qadr.fits</h2>
       </motion.div>
 
       {/* Login / Account Link - Top Right */}
-      <div className="absolute right-8 top-8 z-20">
+      <div className="absolute right-6 top-6 md:right-8 md:top-8 z-20">
         {user ? (
           <div className="relative">
             <button
@@ -128,30 +128,30 @@ const HeroSection = () => {
 
       {/* Scroll Indicator - Bottom Center */}
       <motion.div
-        className="absolute bottom-12 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2"
+        className="absolute bottom-8 md:bottom-12 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
       >
-        <span className="font-mono text-xs uppercase tracking-widest text-warm-grey">Discover</span>
+        <span className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-warm-grey">Discover</span>
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
         >
-          <ChevronDown className="h-6 w-6 text-charcoal" />
+          <ChevronDown className="h-5 w-5 md:h-6 md:w-6 text-charcoal" />
         </motion.div>
       </motion.div>
 
       {/* Grab Button - Bottom Left */}
       <motion.div
-        className="absolute left-8 bottom-12 z-10"
+        className="absolute left-6 bottom-8 md:left-8 md:bottom-12 z-10"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1.2, duration: 1 }}
       >
         <a
           href="#shop"
-          className="group relative flex items-center gap-6 overflow-hidden border-2 border-charcoal bg-charcoal px-10 py-4 font-sans text-xs tracking-[0.3em] uppercase text-white transition-all duration-500 hover:text-charcoal"
+          className="group relative flex items-center gap-4 md:gap-6 overflow-hidden border-2 border-charcoal bg-charcoal px-7 py-3 md:px-10 md:py-4 font-sans text-[10px] md:text-xs tracking-[0.3em] uppercase text-white transition-all duration-500 hover:text-charcoal"
         >
           <span className="relative z-10">Grab</span>
           <span className="relative z-10 inline-block transition-transform duration-500 group-hover:translate-x-2">→</span>

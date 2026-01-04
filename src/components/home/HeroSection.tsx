@@ -7,14 +7,54 @@ import { useAuth } from '@/context/AuthContext';
 const HeroSection = () => {
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = React.useState(false);
+  const [videoLoaded, setVideoLoaded] = React.useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
-  // Ensure video plays immediately
+  // Ensure video plays immediately and handles seamless looping
   React.useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(error => {
-        console.log('Video autoplay failed:', error);
-      });
+    const video = videoRef.current;
+    if (video) {
+      // Set up seamless looping
+      const handleLoadedData = () => {
+        setVideoLoaded(true);
+        video.currentTime = 0;
+      };
+
+      const handleCanPlayThrough = () => {
+        video.play().catch(error => {
+          console.log('Video autoplay failed:', error);
+        });
+      };
+
+      // Ensure seamless loop by resetting to start slightly before end
+      const handleTimeUpdate = () => {
+        if (video.duration && video.duration - video.currentTime < 0.1) {
+          video.currentTime = 0;
+        }
+      };
+
+      // Handle video end to ensure seamless loop
+      const handleEnded = () => {
+        video.currentTime = 0;
+        video.play().catch(error => {
+          console.log('Video replay failed:', error);
+        });
+      };
+
+      video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('canplaythrough', handleCanPlayThrough);
+      video.addEventListener('timeupdate', handleTimeUpdate);
+      video.addEventListener('ended', handleEnded);
+
+      // Preload and start playing
+      video.load();
+
+      return () => {
+        video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('canplaythrough', handleCanPlayThrough);
+        video.removeEventListener('timeupdate', handleTimeUpdate);
+        video.removeEventListener('ended', handleEnded);
+      };
     }
   }, []);
 
@@ -33,15 +73,31 @@ const HeroSection = () => {
           loop
           muted
           playsInline
-          preload="auto"
-          className="h-full w-full object-cover"
+          preload="metadata"
+          className={`h-full w-full object-cover transition-opacity duration-500 ${
+            videoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           poster="/hero-poster.jpg"
+          style={{
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
+          }}
         >
           <source src="/hero-video.mp4" type="video/mp4" />
-          <source src="/hero-video.webm" type="video/webm" />
+          <source src="/Primary_video/IMG_8418.webm" type="video/webm" />
           {/* Fallback message for browsers that don't support video */}
           Your browser does not support the video tag.
         </video>
+        
+        {/* Loading placeholder */}
+        {!videoLoaded && (
+          <div className="absolute inset-0 bg-warm-white flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-charcoal border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="font-sans text-sm tracking-widest uppercase text-charcoal/60">Loading</p>
+            </div>
+          </div>
+        )}
         {/* Subtle Overlay for Legibility */}
         <div className="absolute inset-0 bg-black/5" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
@@ -118,11 +174,12 @@ const HeroSection = () => {
           transition={{ delay: 0.8, duration: 1.2, ease: [0.6, 0.05, 0.01, 0.9] }}
           className="text-center"
         >
-          <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-charcoal">
-            The Last Hoodie
-            <br />
-            You'll Need.
+          <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight" style={{ color: '#550000' }}>
+            قدر
           </h1>
+          <p className="font-sans text-lg md:text-xl tracking-wider mt-4" style={{ color: '#550000' }}>
+            Destiny in detail
+          </p>
         </motion.div>
       </div>
 

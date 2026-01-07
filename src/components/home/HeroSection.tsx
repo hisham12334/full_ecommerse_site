@@ -178,7 +178,7 @@ const HeroSection = () => {
           <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight" style={{ color: '#550000' }}>
             قدر
           </h1>
-          <p className="font-sans text-lg md:text-xl tracking-wider mt-4" style={{ color: '#f5f4f4ff' }}>
+          <p className="font-serif text-lg md:text-xl tracking-wider mt-4" style={{ color: '#f5f4f4ff' }}>
             Destiny in detail
           </p>
         </motion.div>

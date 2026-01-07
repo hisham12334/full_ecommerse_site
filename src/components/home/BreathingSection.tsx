@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 const BreathingSection = () => {
   return (
-    <section className="relative h-screen bg-cool-white flex items-center justify-center">
+    <section className="relative py-24 md:py-32 bg-cool-white flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}

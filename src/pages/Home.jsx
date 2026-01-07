@@ -6,6 +6,7 @@ import WeightVisualizer from '../components/home/WeightVisualizer';
 import MaterialSection from '../components/home/MaterialSection';
 import BreathingSection from '../components/home/BreathingSection';
 import PurchaseSection from '../components/home/PurchaseSection'; // The logic-connected one
+import Footer from '../components/common/Footer';
 
 const Home = () => {
   return (
@@ -17,6 +18,7 @@ const Home = () => {
       <MaterialSection />
       <BreathingSection />
       <PurchaseSection />
+      <Footer />
     </div>
   );
 };

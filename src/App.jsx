@@ -13,6 +13,11 @@ const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const AdminPanel = lazy(() => import('./pages/admin/AdminPanel'));
 const UserDashboard = lazy(() => import('./pages/UserDashboard'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
+const Contact = lazy(() => import('./pages/Contact'));
+const ShippingPolicy = lazy(() => import('./pages/ShippingPolicy'));
 
 function App() {
   // Note: We removed the global "isLoading" check here.
@@ -38,6 +43,11 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/refund-policy" element={<RefundPolicy />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/shipping-policy" element={<ShippingPolicy />} />
                   
                   {/* --- Protected Routes --- */}
                   <Route path="/dashboard" element={<UserDashboard />} />

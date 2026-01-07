@@ -83,6 +83,7 @@ const HeroSection = () => {
             backfaceVisibility: 'hidden',
           }}
         >
+          <source src="/fixed-web-video.mp4" type="video/mp4" />
           <source src="/hero-video.mp4" type="video/mp4" />
           <source src="/Primary_video/IMG_8418.webm" type="video/webm" />
           {/* Fallback message for browsers that don't support video */}
@@ -177,7 +178,7 @@ const HeroSection = () => {
           <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight" style={{ color: '#550000' }}>
             قدر
           </h1>
-          <p className="font-sans text-lg md:text-xl tracking-wider mt-4" style={{ color: '#550000' }}>
+          <p className="font-sans text-lg md:text-xl tracking-wider mt-4" style={{ color: '#f5f4f4ff' }}>
             Destiny in detail
           </p>
         </motion.div>

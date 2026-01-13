@@ -14,20 +14,16 @@ const StorySection = () => {
 
   const stories = [
     {
-      title: "The Problem",
-      text: "Most hoodies pill after one wash. The fabric loses its weight. The cuffs stretch out. You're left with expensive disappointment."
+      title: "Our Roots",
+      text: "This brand comes from lived culture — where Arabic and Urdu influences shaped how we dress and carry ourselves.\n\nModesty was always part of our identity. What was missing was clothing that respected those roots while feeling modern.\n\nWe built this to bridge that gap."
     },
     {
-      title: "Two Years",
-      text: "We spent 847 hours testing fabrics. 23 different mills. 109 sample hoodies. All to find cotton that holds its integrity."
-    },
-    {
-      title: "500GSM",
-      text: "That's grams per square meter. It's heavy. Substantial. The kind of weight you feel when you pick it up. The kind that lasts decades, not seasons."
+      title: "350 GSM",
+      text: "That's our fabric weight. Not light. Not flimsy. Just solid and comfortable.\n\nWe chose 350 GSM for structure, softness, and daily wear. Simple, balanced, dependable."
     },
     {
       title: "One Hoodie",
-      text: "Made right. Made once. That's the philosophy. We're not asking you to buy multiples. Just one that works."
+      text: "We believe in fewer, better pieces. Not pushing more. Just doing it right.\n\nIf this becomes the hoodie you keep reaching for, that's enough.\n\nThat's Qadr Fits."
     }
   ];
 

@@ -11,8 +11,8 @@ const MaterialSection = () => {
   const [ref3, inView3] = useInView({ threshold: 0.3, triggerOnce: true });
 
   const specs = [
-    { label: 'Weight', value: '500 GSM', detail: 'Grams per square meter' },
-    { label: 'Origin', value: 'Portugal', detail: 'Minho Valley mills' },
+    { label: 'Weight', value: '350 GSM', detail: 'Grams per square meter' },
+    { label: 'Origin', value: 'India', detail: 'Southern Textile mills' },
     { label: 'Composition', value: '95% Cotton', detail: '5% Elastane blend' },
     { label: 'Construction', value: 'Flatlock', detail: 'Industrial stitching' },
     { label: 'Treatment', value: 'Garment-dyed', detail: 'Pre-shrunk finish' },

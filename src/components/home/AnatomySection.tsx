@@ -36,7 +36,7 @@ const hotspots: Hotspot[] = [
     id: 'fabric',
     x: 60,
     y: 55,
-    title: '500GSM Cotton',
+    title: '350GSM Cotton',
     description: 'Heavyweight organic cotton from Portuguese mills. Pre-shrunk, garment-dyed.'
   }
 ];

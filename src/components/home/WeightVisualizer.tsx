@@ -16,7 +16,7 @@ const WeightVisualizer = () => {
           transition={{ duration: 0.8 }}
         >
           <h2 className="font-serif text-5xl font-semibold text-charcoal md:text-6xl">
-            500GSM feels like...
+            350GSM feels like...
           </h2>
         </motion.div>
 

@@ -5,9 +5,223 @@ import { Eye, Package, Users, ShoppingBag, TrendingUp, X, Edit2, Trash2, LogOut 
 import { useAuth } from '../../context/AuthContext';
 import apiService from '../../services/api';
 
-// Enhanced Modal component for viewing order details with better mobile scaling
+// Enhanced Modal component for viewing order details with better mobile scaling and print functionality
 const OrderDetailsModal = ({ order, onClose }) => {
     if (!order) return null;
+    
+    const handlePrint = () => {
+        // Create a print-friendly version of the order details
+        const printWindow = window.open('', '_blank');
+        const printContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Order #${order.id} - Shipping Label</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        padding: 20px; 
+                        font-size: 12px;
+                        line-height: 1.4;
+                    }
+                    .container { 
+                        max-width: 800px; 
+                        margin: 0 auto; 
+                        border: 2px solid #000;
+                        padding: 20px;
+                    }
+                    .header { 
+                        text-align: center; 
+                        border-bottom: 2px solid #000; 
+                        padding-bottom: 15px; 
+                        margin-bottom: 20px;
+                    }
+                    .header h1 { 
+                        font-size: 24px; 
+                        margin-bottom: 5px;
+                    }
+                    .header p { 
+                        font-size: 14px; 
+                        color: #666;
+                    }
+                    .section { 
+                        margin-bottom: 20px; 
+                        padding: 15px;
+                        border: 1px solid #ddd;
+                        background: #f9f9f9;
+                    }
+                    .section-title { 
+                        font-size: 14px; 
+                        font-weight: bold; 
+                        margin-bottom: 10px; 
+                        text-transform: uppercase;
+                        border-bottom: 1px solid #000;
+                        padding-bottom: 5px;
+                    }
+                    .row { 
+                        display: flex; 
+                        justify-content: space-between; 
+                        margin-bottom: 8px;
+                    }
+                    .label { 
+                        font-weight: bold; 
+                        width: 120px;
+                    }
+                    .value { 
+                        flex: 1;
+                    }
+                    .items-table { 
+                        width: 100%; 
+                        border-collapse: collapse; 
+                        margin-top: 10px;
+                    }
+                    .items-table th, .items-table td { 
+                        border: 1px solid #000; 
+                        padding: 8px; 
+                        text-align: left;
+                    }
+                    .items-table th { 
+                        background: #000; 
+                        color: #fff; 
+                        font-weight: bold;
+                    }
+                    .total-section { 
+                        margin-top: 20px; 
+                        padding: 15px; 
+                        background: #000; 
+                        color: #fff;
+                        text-align: right;
+                        font-size: 18px;
+                        font-weight: bold;
+                    }
+                    .status-badge {
+                        display: inline-block;
+                        padding: 5px 15px;
+                        border-radius: 20px;
+                        font-weight: bold;
+                        font-size: 12px;
+                    }
+                    .status-confirmed { background: #fef3c7; color: #92400e; }
+                    .status-shipped { background: #dbeafe; color: #1e40af; }
+                    .status-delivered { background: #d1fae5; color: #065f46; }
+                    .status-pending { background: #f3f4f6; color: #374151; }
+                    .status-cancelled { background: #fee2e2; color: #991b1b; }
+                    .shipping-address {
+                        font-size: 14px;
+                        line-height: 1.6;
+                        padding: 10px;
+                        background: #fff;
+                        border: 1px solid #000;
+                        margin-top: 10px;
+                    }
+                    @media print {
+                        body { padding: 0; }
+                        .container { border: none; }
+                        button { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>SHIPPING LABEL</h1>
+                        <p>Order #${order.id}</p>
+                        <p>Date: ${new Date(order.created_at).toLocaleDateString('en-IN', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</p>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Order Status</div>
+                        <span class="status-badge status-${order.order_status}">
+                            ${order.order_status.toUpperCase()}
+                        </span>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Customer Information</div>
+                        <div class="row">
+                            <span class="label">Name:</span>
+                            <span class="value">${order.user_name}</span>
+                        </div>
+                        <div class="row">
+                            <span class="label">Email:</span>
+                            <span class="value">${order.user_email}</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">📍 Shipping Address</div>
+                        ${order.shipping_address ? `
+                            <div class="shipping-address">
+                                <strong>${order.shipping_address.firstName} ${order.shipping_address.lastName}</strong><br>
+                                ${order.shipping_address.address}<br>
+                                ${order.shipping_address.city}, ${order.shipping_address.state} ${order.shipping_address.zipCode}<br>
+                                <strong>Phone:</strong> ${order.shipping_address.phone}
+                            </div>
+                        ` : '<p>Address not available</p>'}
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">📦 Items Ordered (${order.items?.length || 0})</div>
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>SKU</th>
+                                    <th>Size</th>
+                                    <th>Color</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${order.items && order.items.length > 0 ? order.items.map(item => `
+                                    <tr>
+                                        <td>${item.title}</td>
+                                        <td>${item.sku || 'N/A'}</td>
+                                        <td>${item.size}</td>
+                                        <td>${item.selectedColor || '-'}</td>
+                                        <td>${item.quantity}</td>
+                                        <td>₹${item.price.toFixed(2)}</td>
+                                        <td>₹${(item.price * item.quantity).toFixed(2)}</td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="7">No items</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="total-section">
+                        ORDER TOTAL: ₹${order.total ? order.total.toFixed(2) : '0.00'}
+                    </div>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed #000; text-align: center; color: #666;">
+                        <p>Thank you for your order!</p>
+                        <p style="margin-top: 10px; font-size: 10px;">This is a computer-generated document. No signature required.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+        
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        
+        // Wait for content to load, then print
+        printWindow.onload = function() {
+            printWindow.focus();
+            printWindow.print();
+            // Optionally close the window after printing
+            // printWindow.close();
+        };
+    };
+    
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-2 lg:p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[95vh] lg:max-h-[90vh] overflow-hidden flex flex-col">
@@ -111,11 +325,22 @@ const OrderDetailsModal = ({ order, onClose }) => {
                     </div>
                 </div>
                 
-                {/* Fixed Footer with Total */}
+                {/* Fixed Footer with Total and Print Button */}
                 <div className="border-t bg-white p-4 lg:p-6 flex-shrink-0">
-                    <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold text-gray-700">Order Total:</span>
-                        <span className="text-2xl font-bold text-gray-900">₹{order.total ? order.total.toFixed(2) : '0.00'}</span>
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="flex justify-between items-center w-full sm:w-auto">
+                            <span className="text-lg font-semibold text-gray-700">Order Total:</span>
+                            <span className="text-2xl font-bold text-gray-900 ml-4">₹{order.total ? order.total.toFixed(2) : '0.00'}</span>
+                        </div>
+                        <button
+                            onClick={handlePrint}
+                            className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm min-h-[48px]"
+                        >
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            Print Shipping Label
+                        </button>
                     </div>
                 </div>
             </div>

@@ -79,6 +79,54 @@ class AuthController {
         res.status(500).json({ error: 'Server error during login' });
     }
   }
+
+  // Google OAuth authentication
+  async googleAuth(req, res) {
+    const { credential, name, email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    try {
+      // Check if user already exists
+      const existingUserResult = await this.db.query("SELECT * FROM users WHERE email = $1", [email]);
+      let user = existingUserResult.rows[0];
+
+      if (user) {
+        // User exists, log them in
+        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+        
+        const { password: _, ...userResponse } = user;
+
+        return res.json({
+          success: true,
+          user: userResponse,
+          token
+        });
+      } else {
+        // Create new user with Google account
+        const query = "INSERT INTO users (name, email, password, google_id) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role";
+        // Use a random password hash for Google users (they won't use it)
+        const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
+        const values = [name, email, randomPassword, credential];
+
+        const result = await this.db.query(query, values);
+        const newUser = result.rows[0];
+
+        const token = jwt.sign({ id: newUser.id, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '24h' });
+        
+        return res.status(201).json({
+          success: true,
+          user: newUser,
+          token
+        });
+      }
+    } catch (error) {
+      console.error('Google auth error:', error);
+      res.status(500).json({ error: 'Server error during Google authentication' });
+    }
+  }
 }
 
 module.exports = AuthController;

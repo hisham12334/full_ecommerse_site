@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
@@ -10,7 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, register, isLoading, user } = useAuth();
+  const { login, register, googleLogin, isLoading, user } = useAuth();
   const navigate = useNavigate();
 
   // If already logged in, redirect based on role
@@ -60,6 +62,29 @@ const Login = () => {
         setError(result.error || 'Login failed');
       }
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const result = await googleLogin(
+        credentialResponse.credential,
+        decoded.name,
+        decoded.email
+      );
+
+      if (!result.success) {
+        setError(result.error || 'Google sign-in failed');
+      }
+      // Navigation is handled by the useEffect above
+    } catch (error) {
+      setError('Failed to process Google sign-in');
+      console.error('Google sign-in error:', error);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google sign-in was cancelled or failed');
   };
 
   return (
@@ -146,6 +171,30 @@ const Login = () => {
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isRegisterMode ? 'Create Account' : 'Sign In')}
           </button>
         </form>
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-warm-grey/30"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-warm-grey">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap
+              text={isRegisterMode ? "signup_with" : "signin_with"}
+              shape="rectangular"
+              theme="outline"
+              size="large"
+              width="100%"
+            />
+          </div>
+        </div>
 
         <div className="mt-6 text-center">
           <button

@@ -90,6 +90,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (credential, name, email) => {
+    setIsLoading(true);
+    try {
+      const response = await apiService.googleAuth({ credential, name, email });
+
+      if (response.success && response.user) {
+        const userData = {
+          ...response.user,
+          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${response.user.email}`
+        };
+
+        setUser(userData);
+        // Store the complete user object and token
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('authToken', response.token);
+
+        return { success: true, user: userData };
+      } else {
+        throw new Error(response.error || 'Google authentication failed');
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     // Clear user-specific cart from localStorage
     if (user) {
@@ -111,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     isInitializing,
     login,
     register,
+    googleLogin,
     logout,
     isAuthenticated: !!user,
   };

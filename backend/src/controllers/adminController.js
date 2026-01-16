@@ -1,4 +1,5 @@
 // backend/src/controllers/adminController.js
+const whatsappService = require('../services/whatsappService');
 
 class AdminController {
     constructor(db) {
@@ -83,7 +84,71 @@ class AdminController {
     async updateUserRole(req, res) { const { id } = req.params; const { role } = req.body; if (!role || !['user', 'admin'].includes(role)) { return res.status(400).json({ error: 'Invalid role' }); } try { const result = await this.db.query("UPDATE users SET role = $1 WHERE id = $2", [role, id]); if (result.rowCount === 0) return res.status(404).json({ error: 'User not found' }); res.json({ success: true, message: 'User role updated' }); } catch (error) { console.error('Error updating user role:', error); res.status(500).json({ error: 'Failed to update user role' }); } }
     async deleteUser(req, res) { const { id } = req.params; try { const result = await this.db.query("DELETE FROM users WHERE id = $1", [id]); if (result.rowCount === 0) return res.status(404).json({ error: 'User not found' }); res.json({ success: true, message: 'User deleted' }); } catch (error) { console.error('Error deleting user:', error); res.status(500).json({ error: 'Failed to delete user' }); } }
     async getAllOrders(req, res) { try { const result = await this.db.query(` SELECT o.*, u.name as user_name, u.email as user_email FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC `); res.json(result.rows); } catch (error) { console.error('Error fetching all orders:', error); res.status(500).json({ error: 'Failed to fetch orders' }); } }
-    async updateOrderStatus(req, res) { const { id } = req.params; const { order_status } = req.body; const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']; if (!order_status || !validStatuses.includes(order_status)) { return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` }); } try { const result = await this.db.query("UPDATE orders SET order_status = $1 WHERE id = $2 RETURNING *", [order_status, id]); if (result.rowCount === 0) { return res.status(404).json({ error: 'Order not found' }); } res.json({ success: true, message: 'Order status updated successfully', order: result.rows[0] }); } catch (error) { console.error('Error updating order status:', error); res.status(500).json({ error: 'Failed to update order status' }); } }
+    async updateOrderStatus(req, res) { 
+        const { id } = req.params; 
+        const { order_status } = req.body; 
+        const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']; 
+        
+        if (!order_status || !validStatuses.includes(order_status)) { 
+            return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` }); 
+        } 
+        
+        try { 
+            // Get the order details before updating
+            const orderResult = await this.db.query("SELECT * FROM orders WHERE id = $1", [id]);
+            
+            if (orderResult.rows.length === 0) {
+                return res.status(404).json({ error: 'Order not found' });
+            }
+            
+            const order = orderResult.rows[0];
+            const previousStatus = order.order_status;
+            
+            // Update the order status
+            const result = await this.db.query(
+                "UPDATE orders SET order_status = $1 WHERE id = $2 RETURNING *", 
+                [order_status, id]
+            );
+            
+            const updatedOrder = result.rows[0];
+            
+            // Send WhatsApp notification based on status change
+            try {
+                const shippingAddress = updatedOrder.shipping_address;
+                const items = updatedOrder.items;
+                
+                if (shippingAddress && shippingAddress.phone) {
+                    const orderDetails = {
+                        orderId: updatedOrder.id,
+                        items: items,
+                        total: updatedOrder.total,
+                        shippingAddress: shippingAddress
+                    };
+                    
+                    // Send notification based on new status
+                    if (order_status === 'shipped' && previousStatus !== 'shipped') {
+                        await whatsappService.sendOrderShippedMessage(shippingAddress.phone, orderDetails);
+                    } else if (order_status === 'delivered' && previousStatus !== 'delivered') {
+                        await whatsappService.sendOrderDeliveredMessage(shippingAddress.phone, orderDetails);
+                    } else if (order_status === 'confirmed' && previousStatus !== 'confirmed') {
+                        await whatsappService.sendOrderConfirmedMessage(shippingAddress.phone, orderDetails);
+                    }
+                }
+            } catch (whatsappError) {
+                // Log but don't fail the status update if WhatsApp fails
+                console.error('WhatsApp notification failed:', whatsappError);
+            }
+            
+            res.json({ 
+                success: true, 
+                message: 'Order status updated successfully', 
+                order: updatedOrder 
+            }); 
+        } catch (error) { 
+            console.error('Error updating order status:', error); 
+            res.status(500).json({ error: 'Failed to update order status' }); 
+        } 
+    }
     async updateProduct(req, res) { const { id } = req.params; const { title, price, description, category, colors, variants, status } = req.body; const imagePath = req.file ? req.file.path : null; let parsedVariants, parsedColors; try { parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : (variants || []); parsedColors = colors ? (typeof colors === 'string' ? JSON.parse(colors) : colors) : []; } catch (e) { return res.status(400).json({ error: 'Invalid JSON format for variants or colors.' }); } const client = await this.db.connect(); try { await client.query('BEGIN'); const productFields = { title, price, description, category, status, colors: JSON.stringify(parsedColors) }; if (imagePath) { productFields.images = JSON.stringify([imagePath]); } const setClauses = Object.keys(productFields) .filter(key => productFields[key] !== undefined) .map((key, i) => `"${key}" = $${i + 1}`) .join(', '); if (setClauses) { const values = Object.values(productFields).filter(v => v !== undefined); values.push(id); const productUpdateQuery = `UPDATE products SET ${setClauses} WHERE id = $${values.length}`; await client.query(productUpdateQuery, values); } if(Array.isArray(parsedVariants)) { await client.query('DELETE FROM product_variants WHERE product_id = $1', [id]); const variantInsertQuery = ` INSERT INTO product_variants (product_id, size, sku, quantity) VALUES ($1, $2, $3, $4) `; for (const variant of parsedVariants) { if (variant.sku && variant.sku.trim()) { await client.query(variantInsertQuery, [id, variant.size, variant.sku.trim(), variant.quantity || 0]); } } } await client.query('COMMIT'); res.json({ success: true, message: 'Product updated successfully' }); } catch (error) { await client.query('ROLLBACK'); console.error('Failed to update product:', error); res.status(500).json({ error: 'Failed to update product' }); } finally { client.release(); } }
 }
 

@@ -2,6 +2,7 @@
 
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const whatsappService = require('../services/whatsappService');
 
 class PaymentController {
   constructor(db) {
@@ -76,12 +77,32 @@ class PaymentController {
       }
 
       // If signature is valid and status is pending, update the order
+      // AUTOMATICALLY CHANGE STATUS TO 'confirmed' after successful payment
       await client.query(
-          "UPDATE orders SET payment_id = $1, payment_status = 'paid', razorpay_order_id = $2 WHERE id = $3", 
+          "UPDATE orders SET payment_id = $1, payment_status = 'paid', order_status = 'confirmed', razorpay_order_id = $2 WHERE id = $3", 
           [razorpay_payment_id, razorpay_order_id, orderId]
       );
 
       await client.query('COMMIT');
+
+      // Send WhatsApp notification for order confirmation
+      try {
+        const shippingAddress = order.shipping_address;
+        const items = order.items;
+        
+        if (shippingAddress && shippingAddress.phone) {
+          await whatsappService.sendOrderConfirmedMessage(shippingAddress.phone, {
+            orderId: order.id,
+            items: items,
+            total: order.total,
+            shippingAddress: shippingAddress
+          });
+        }
+      } catch (whatsappError) {
+        // Log but don't fail the payment confirmation if WhatsApp fails
+        console.error('WhatsApp notification failed:', whatsappError);
+      }
+
       res.json({ success: true, message: 'Payment confirmed and order updated successfully.' });
 
     } catch (error) {

@@ -62,6 +62,10 @@ class ApiService {
   async login(credentials) {
     return this.request('/auth/login', { method: 'POST', body: JSON.stringify(credentials) });
   }
+
+  async googleAuth(googleData) {
+    return this.request('/auth/google', { method: 'POST', body: JSON.stringify(googleData) });
+  }
   
   // Public product methods
   async getProducts() {

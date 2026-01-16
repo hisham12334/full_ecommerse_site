@@ -16,6 +16,9 @@ const createAuthRoutes = (db) => {
   // User login
   router.post('/login', (req, res) => authController.login(req, res));
 
+  // Google OAuth login
+  router.post('/google', (req, res) => authController.googleAuth(req, res));
+
   return router;
 };
 

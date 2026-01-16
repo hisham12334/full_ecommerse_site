@@ -34,6 +34,17 @@ async function initializeTables(dbPool) {
     
     // Create tables one by one
     await client.query(`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, role TEXT DEFAULT 'user', created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)`);
+    
+    // Add google_id column if it doesn't exist
+    await client.query(`
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='google_id') THEN
+          ALTER TABLE users ADD COLUMN google_id TEXT;
+        END IF;
+      END $$;
+    `);
+    
     await client.query(`CREATE TABLE IF NOT EXISTS products (id SERIAL PRIMARY KEY, title TEXT NOT NULL, price INTEGER NOT NULL, images JSONB, description TEXT, category TEXT, colors JSONB, status TEXT DEFAULT 'active', created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)`);
     await client.query(`CREATE TABLE IF NOT EXISTS product_variants (id SERIAL PRIMARY KEY, product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE, size TEXT NOT NULL, sku TEXT UNIQUE NOT NULL, quantity INTEGER NOT NULL DEFAULT 0, UNIQUE (product_id, size))`);
     await client.query(`CREATE TABLE IF NOT EXISTS orders (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), items JSONB NOT NULL, total INTEGER NOT NULL, shipping_address JSONB NOT NULL, payment_id TEXT, payment_status TEXT DEFAULT 'pending', order_status TEXT DEFAULT 'pending', razorpay_order_id TEXT, created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)`);

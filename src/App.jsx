@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
@@ -24,50 +25,54 @@ function App() {
   // Why? So the website loads instantly. The 'PurchaseSection' 
   // handles its own loading state internally now.
 
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
   return (
-    <AuthProvider>
-      <CartProvider>
-        <ProductProvider> {/* Provides product data to the whole app */}
-          <Router>
-            <div className="min-h-screen bg-warm-white">
-              
-              {/* This handles the loading of the page files themselves */}
-              <Suspense fallback={
-                <div className="min-h-screen flex items-center justify-center">
-                  <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
-                </div>
-              }>
-                <Routes>
-                  {/* --- Public Routes --- */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/refund-policy" element={<RefundPolicy />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/shipping-policy" element={<ShippingPolicy />} />
-                  
-                  {/* --- Protected Routes --- */}
-                  <Route path="/dashboard" element={<UserDashboard />} />
-                  
-                  {/* Admin Route */}
-                  <Route 
-                    path="/admin"
-                    element={
-                      <AdminRoute>
-                        <AdminPanel />
-                      </AdminRoute>
-                    } 
-                  />
-                </Routes>
-              </Suspense>
-            </div>
-          </Router>
-        </ProductProvider>
-      </CartProvider>
-    </AuthProvider>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <AuthProvider>
+        <CartProvider>
+          <ProductProvider> {/* Provides product data to the whole app */}
+            <Router>
+              <div className="min-h-screen bg-warm-white">
+                
+                {/* This handles the loading of the page files themselves */}
+                <Suspense fallback={
+                  <div className="min-h-screen flex items-center justify-center">
+                    <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+                  </div>
+                }>
+                  <Routes>
+                    {/* --- Public Routes --- */}
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/terms-of-service" element={<TermsOfService />} />
+                    <Route path="/refund-policy" element={<RefundPolicy />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                    
+                    {/* --- Protected Routes --- */}
+                    <Route path="/dashboard" element={<UserDashboard />} />
+                    
+                    {/* Admin Route */}
+                    <Route 
+                      path="/admin"
+                      element={
+                        <AdminRoute>
+                          <AdminPanel />
+                        </AdminRoute>
+                      } 
+                    />
+                  </Routes>
+                </Suspense>
+              </div>
+            </Router>
+          </ProductProvider>
+        </CartProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
 

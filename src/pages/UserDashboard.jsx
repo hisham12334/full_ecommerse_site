@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useOrders } from '../hooks/useOrders';
-import { formatDate } from '../services/utils/formatting';
+import { formatDate, formatDateTime } from '../services/utils/formatting';
 import { Navigate, Link } from 'react-router-dom';
-import { LogOut, Home } from 'lucide-react';
+import { LogOut, Home, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 // A simple loading spinner component
 const Spinner = () => (
@@ -16,6 +16,7 @@ export default function UserDashboard() {
   const { user, isInitializing, logout } = useAuth();
   const { orders, loading: ordersLoading, error: ordersError } = useOrders();
   const [activeTab, setActiveTab] = useState('orders');
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   // Show loading while checking authentication
   if (isInitializing) {
@@ -30,6 +31,10 @@ export default function UserDashboard() {
   if (!user) {
     return <Navigate to="/" replace />;
   }
+
+  const toggleOrderDetails = (orderId) => {
+    setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -87,20 +92,166 @@ export default function UserDashboard() {
                     </div>
                   ) : orders && orders.length > 0 ? (
                     <div className="space-y-4">
-                      {orders.map(order => (
-                        <div key={order.id} className="border-b border-red-500/20 pb-4 last:border-b-0">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-semibold text-white">Order #{order.id}</p>
-                              <p className="text-sm text-gray-400">Date: {formatDate(order.created_at)}</p>
+                      {orders.map(order => {
+                        const isCancelled = order.order_status === 'cancelled';
+                        const isExpanded = expandedOrderId === order.id;
+                        return (
+                          <div 
+                            key={order.id} 
+                            className={`border border-red-500/20 rounded-lg p-4 ${isCancelled ? 'opacity-75' : ''}`}
+                          >
+                            {/* Order Header */}
+                            <div 
+                              className="flex justify-between items-start cursor-pointer"
+                              onClick={() => toggleOrderDetails(order.id)}
+                            >
+                              <div className="flex-1">
+                                <p className={`font-semibold ${isCancelled ? 'text-gray-400 line-through' : 'text-white'}`}>
+                                  Order #{order.id}
+                                </p>
+                                <p className="text-sm text-gray-400">Date: {formatDate(order.created_at)}</p>
+                                
+                                {/* Cancellation Information */}
+                                {isCancelled && order.cancellation_reason && (
+                                  <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-md">
+                                    <div className="flex items-start gap-2">
+                                      <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                                      <div className="flex-1">
+                                        <p className="text-sm font-semibold text-red-400 mb-1">Order Cancelled</p>
+                                        <p className="text-xs text-gray-400">{order.cancellation_reason}</p>
+                                        {order.cancelled_at && (
+                                          <p className="text-xs text-gray-500 mt-1">
+                                            Cancelled on: {formatDateTime(order.cancelled_at)}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-right ml-4 flex items-start gap-3">
+                                <div>
+                                  <p className={`font-semibold ${isCancelled ? 'text-gray-400 line-through' : 'text-white'}`}>
+                                    ₹{order.total?.toLocaleString() || '0'}
+                                  </p>
+                                  <span 
+                                    className={`text-xs px-2 py-1 rounded-full capitalize border ${
+                                      isCancelled 
+                                        ? 'bg-red-500/20 text-red-400 border-red-500/30' 
+                                        : order.order_status === 'paid' 
+                                          ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                          : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                                    }`}
+                                  >
+                                    {order.order_status || 'pending'}
+                                  </span>
+                                </div>
+                                {isExpanded ? (
+                                  <ChevronUp className="w-5 h-5 text-gray-400" />
+                                ) : (
+                                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                                )}
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="font-semibold text-white">₹{order.total?.toLocaleString() || '0'}</p>
-                              <span className="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400 capitalize border border-red-500/30">{order.order_status || 'pending'}</span>
-                            </div>
+
+                            {/* Expanded Order Details */}
+                            {isExpanded && (
+                              <div className="mt-4 pt-4 border-t border-red-500/20">
+                                <h3 className="text-sm font-semibold text-white mb-3 uppercase tracking-wider">Order Details</h3>
+                                
+                                {/* Order Items */}
+                                {order.items && order.items.length > 0 && (
+                                  <div className="mb-4">
+                                    <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Items</h4>
+                                    <div className="space-y-2">
+                                      {order.items.map((item, idx) => (
+                                        <div key={idx} className="flex justify-between items-center text-sm bg-gray-800/50 p-2 rounded">
+                                          <div className="flex-1">
+                                            <p className="text-white">{item.title}</p>
+                                            <p className="text-xs text-gray-400">
+                                              {item.size && `Size: ${item.size}`}
+                                              {item.selectedColor && ` • Color: ${item.selectedColor}`}
+                                              {` • Qty: ${item.quantity}`}
+                                            </p>
+                                          </div>
+                                          <p className="text-white font-semibold">₹{(item.price * item.quantity).toLocaleString()}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Shipping Address */}
+                                {order.shipping_address && (
+                                  <div className="mb-4">
+                                    <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Shipping Address</h4>
+                                    <div className="text-sm text-gray-300 bg-gray-800/50 p-3 rounded">
+                                      <p>{order.shipping_address.name}</p>
+                                      <p>{order.shipping_address.address}</p>
+                                      <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.pincode}</p>
+                                      <p>Phone: {order.shipping_address.phone}</p>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Payment Information */}
+                                <div className="mb-4">
+                                  <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Payment Information</h4>
+                                  <div className="text-sm bg-gray-800/50 p-3 rounded space-y-1">
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-400">Payment Status:</span>
+                                      <span className={`font-semibold ${order.payment_status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
+                                        {order.payment_status || 'pending'}
+                                      </span>
+                                    </div>
+                                    {order.payment_id && (
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-400">Payment ID:</span>
+                                        <span className="text-white font-mono text-xs">{order.payment_id}</span>
+                                      </div>
+                                    )}
+                                    <div className="flex justify-between pt-2 border-t border-red-500/20">
+                                      <span className="text-white font-semibold">Total:</span>
+                                      <span className="text-white font-semibold">₹{order.total?.toLocaleString() || '0'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Cancellation Details (if cancelled) */}
+                                {isCancelled && (
+                                  <div>
+                                    <h4 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Cancellation Details</h4>
+                                    <div className="text-sm bg-red-500/10 border border-red-500/30 p-3 rounded space-y-1">
+                                      {order.cancellation_reason && (
+                                        <div>
+                                          <span className="text-gray-400">Reason:</span>
+                                          <p className="text-red-400 mt-1">{order.cancellation_reason}</p>
+                                        </div>
+                                      )}
+                                      {order.cancelled_at && (
+                                        <div className="pt-2 border-t border-red-500/20">
+                                          <span className="text-gray-400">Cancelled At:</span>
+                                          <p className="text-gray-300 mt-1">{formatDateTime(order.cancelled_at)}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Order Timestamps */}
+                                <div className="mt-4 pt-3 border-t border-red-500/20 text-xs text-gray-500">
+                                  <div className="flex justify-between">
+                                    <span>Created: {formatDateTime(order.created_at)}</span>
+                                    {order.updated_at && order.updated_at !== order.created_at && (
+                                      <span>Updated: {formatDateTime(order.updated_at)}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-gray-400">You haven't placed any orders yet.</p>

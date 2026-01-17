@@ -28,13 +28,15 @@ const PrivacyPolicy = () => {
               <h3 className="font-serif text-xl text-charcoal mb-4">Qadr Fits Private Limited</h3>
               <div className="space-y-2 font-sans text-charcoal">
                 <p><strong>Registered Address:</strong><br />
-                123 Fashion Street, Textile District<br />
-                Mumbai, Maharashtra 400001<br />
+                Prabhavathi Meghana Towers F4, 4th Main Rd<br />
+                Maruthi Layout, Hongasandra<br />
+                Bengaluru, Karnataka 560068<br />
+                Landmark: Near Dee sports<br />
                 India</p>
                 
                 <p><strong>Corporate Identification Number (CIN):</strong> U18101MH2024PTC123456</p>
                 <p><strong>GST Registration Number:</strong> 27AABCQ1234F1Z5</p>
-                <p><strong>Email:</strong> contact@qadr.fits</p>
+                <p><strong>Email:</strong> qadr.fits@gmail.com</p>
                 <p><strong>Phone:</strong> +91 98765 43210</p>
                 <p><strong>Website:</strong> https://qadr.fits</p>
               </div>
@@ -208,13 +210,15 @@ const PrivacyPolicy = () => {
                 please contact us:
               </p>
               <div className="font-sans text-charcoal space-y-2">
-                <p><strong>Data Protection Officer:</strong> privacy@qadr.fits</p>
-                <p><strong>General Inquiries:</strong> contact@qadr.fits</p>
+                <p><strong>Data Protection Officer:</strong> qadr.fits@gmail.com</p>
+                <p><strong>General Inquiries:</strong> qadr.fits@gmail.com</p>
                 <p><strong>Phone:</strong> +91 98765 43210</p>
                 <p><strong>Address:</strong><br />
                 Qadr Fits Private Limited<br />
-                123 Fashion Street, Textile District<br />
-                Mumbai, Maharashtra 400001<br />
+                Prabhavathi Meghana Towers F4, 4th Main Rd<br />
+                Maruthi Layout, Hongasandra<br />
+                Bengaluru, Karnataka 560068<br />
+                Landmark: Near Dee sports<br />
                 India</p>
               </div>
             </div>

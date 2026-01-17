@@ -28,8 +28,8 @@ const ShippingPolicy = () => {
               <div className="space-y-2 font-sans text-charcoal">
                 <p>CIN: U18101MH2024PTC123456</p>
                 <p>GST: 27AABCQ1234F1Z5</p>
-                <p>Address: 123 Fashion Street, Textile District, Mumbai, Maharashtra 400001, India</p>
-                <p>Email: shipping@qadr.fits | Phone: +91 98765 43210</p>
+                <p>Address: Prabhavathi Meghana Towers F4, 4th Main Rd, Maruthi Layout, Hongasandra, Bengaluru, Karnataka 560068, Landmark: Near Dee sports, India</p>
+                <p>Email: qadr.fits@gmail.com | Phone: +91 98765 43210</p>
               </div>
             </div>
           </section>

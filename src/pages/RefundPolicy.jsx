@@ -28,8 +28,8 @@ const RefundPolicy = () => {
               <div className="space-y-2 font-sans text-charcoal">
                 <p>CIN: U18101MH2024PTC123456</p>
                 <p>GST: 27AABCQ1234F1Z5</p>
-                <p>Address: 123 Fashion Street, Textile District, Mumbai, Maharashtra 400001, India</p>
-                <p>Email: refunds@qadr.fits | Phone: +91 98765 43210</p>
+                <p>Address: Prabhavathi Meghana Towers F4, 4th Main Rd, Maruthi Layout, Hongasandra, Bengaluru, Karnataka 560068, Landmark: Near Dee sports, India</p>
+                <p>Email: qadr.fits@gmail.com | Phone: +91 98765 43210</p>
               </div>
             </div>
           </section>
@@ -205,14 +205,16 @@ const RefundPolicy = () => {
                 For refund requests and queries, contact us:
               </p>
               <div className="font-sans text-charcoal space-y-2">
-                <p><strong>Refund Department:</strong> refunds@qadr.fits</p>
+                <p><strong>Refund Department:</strong> qadr.fits@gmail.com</p>
                 <p><strong>Customer Service:</strong> +91 98765 43210</p>
                 <p><strong>WhatsApp:</strong> +91 98765 43210</p>
                 <p><strong>Business Hours:</strong> Monday to Saturday, 10 AM to 6 PM IST</p>
                 <p><strong>Address:</strong><br />
                 Qadr Fits Private Limited<br />
-                123 Fashion Street, Textile District<br />
-                Mumbai, Maharashtra 400001<br />
+                Prabhavathi Meghana Towers F4, 4th Main Rd<br />
+                Maruthi Layout, Hongasandra<br />
+                Bengaluru, Karnataka 560068<br />
+                Landmark: Near Dee sports<br />
                 India</p>
               </div>
             </div>

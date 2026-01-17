@@ -12,6 +12,10 @@ const createAdminRoutes = require('./routes/admin');
 const createPaymentRoutes = require('./routes/payments');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 
+// Import cron job and logger
+const { initializeOrderCancellationJob } = require('./jobs/orderCancellationJob');
+const logger = require('./utils/logger');
+
 async function startServer() {
   // 1. Await a successful database connection
   const db = await connectToDatabase();
@@ -19,6 +23,19 @@ async function startServer() {
   await initializeTables(db);
 
   console.log("Database is ready. Initializing Express server...");
+
+  // 3. Initialize cron jobs
+  try {
+    initializeOrderCancellationJob(db, logger);
+    logger.info('Cron jobs initialized successfully');
+  } catch (error) {
+    logger.error('Failed to initialize cron jobs', {
+      error: error.message,
+      stack: error.stack
+    });
+    // Don't stop server startup, but log the error
+    console.error('Warning: Cron job initialization failed, but server will continue');
+  }
 
   const app = express();
   const PORT = process.env.PORT || 5000;

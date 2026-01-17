@@ -70,7 +70,7 @@ class OrderController {
         enrichedItems.push(enrichedItem);
       }
       
-      const orderQuery = `INSERT INTO orders (user_id, items, total, shipping_address) VALUES ($1, $2, $3, $4) RETURNING id`;
+      const orderQuery = `INSERT INTO orders (user_id, items, total, shipping_address, order_status, payment_status) VALUES ($1, $2, $3, $4, 'pending', 'pending') RETURNING id`;
       const orderResult = await client.query(orderQuery, [userId, JSON.stringify(enrichedItems), serverCalculatedTotal, JSON.stringify(shippingAddress)]);
       const newOrderId = orderResult.rows[0].id;
 
@@ -92,7 +92,17 @@ class OrderController {
   async getUserOrders(req, res) {
     const userId = req.user.id;
     try {
-      const result = await this.db.query("SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", [userId]);
+      const result = await this.db.query(
+        `SELECT 
+          id, user_id, items, total, shipping_address,
+          payment_status, order_status, 
+          cancelled_at, cancellation_reason,
+          created_at, updated_at
+        FROM orders 
+        WHERE user_id = $1 
+        ORDER BY created_at DESC`,
+        [userId]
+      );
       res.json(result.rows);
     } catch (error) {
       console.error('Error fetching user orders:', error);

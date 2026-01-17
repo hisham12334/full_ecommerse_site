@@ -132,7 +132,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-warm-grey/30 rounded focus:ring-1 focus:ring-charcoal focus:border-charcoal outline-none transition-all"
-              placeholder={isRegisterMode ? "your@email.com" : "admin@admin.com"}
+              placeholder="your@email.com"
               required
             />
           </div>

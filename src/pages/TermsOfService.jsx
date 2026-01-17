@@ -43,8 +43,8 @@ const TermsOfService = () => {
                 <p><strong>Qadr Fits Private Limited</strong></p>
                 <p>CIN: U18101MH2024PTC123456</p>
                 <p>GST: 27AABCQ1234F1Z5</p>
-                <p>Address: 123 Fashion Street, Textile District, Mumbai, Maharashtra 400001, India</p>
-                <p>Email: contact@qadr.fits</p>
+                <p>Address: Prabhavathi Meghana Towers F4, 4th Main Rd, Maruthi Layout, Hongasandra, Bengaluru, Karnataka 560068, Landmark: Near Dee sports, India</p>
+                <p>Email: qadr.fits@gmail.com</p>
                 <p>Phone: +91 98765 43210</p>
               </div>
             </div>
@@ -215,12 +215,14 @@ const TermsOfService = () => {
                 If you have any questions about these Terms of Service, please contact us:
               </p>
               <div className="font-sans text-charcoal space-y-2">
-                <p><strong>Email:</strong> legal@qadr.fits</p>
+                <p><strong>Email:</strong> qadr.fits@gmail.com</p>
                 <p><strong>Phone:</strong> +91 98765 43210</p>
                 <p><strong>Address:</strong><br />
                 Qadr Fits Private Limited<br />
-                123 Fashion Street, Textile District<br />
-                Mumbai, Maharashtra 400001<br />
+                Prabhavathi Meghana Towers F4, 4th Main Rd<br />
+                Maruthi Layout, Hongasandra<br />
+                Bengaluru, Karnataka 560068<br />
+                Landmark: Near Dee sports<br />
                 India</p>
               </div>
             </div>

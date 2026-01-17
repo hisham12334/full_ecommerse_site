@@ -54,8 +54,10 @@ const Contact = () => {
                   <h3 className="font-serif text-xl text-charcoal mb-2">Visit Our Store</h3>
                   <p className="font-sans text-warm-grey">
                     Qadr Fits Private Limited<br />
-                    123 Fashion Street, Textile District<br />
-                    Mumbai, Maharashtra 400001<br />
+                    Prabhavathi Meghana Towers F4, 4th Main Rd<br />
+                    Maruthi Layout, Hongasandra<br />
+                    Bengaluru, Karnataka 560068<br />
+                    Landmark: Near Dee sports<br />
                     India
                   </p>
                 </div>
@@ -83,9 +85,9 @@ const Contact = () => {
                 <div>
                   <h3 className="font-serif text-xl text-charcoal mb-2">Email Us</h3>
                   <div className="font-sans text-warm-grey space-y-1">
-                    <p>General: contact@qadr.fits</p>
-                    <p>Orders: orders@qadr.fits</p>
-                    <p>Support: support@qadr.fits</p>
+                    <p>General: qadr.fits@gmail.com</p>
+                    <p>Orders: qadr.fits@gmail.com</p>
+                    <p>Support: qadr.fits@gmail.com</p>
                   </div>
                 </div>
               </div>

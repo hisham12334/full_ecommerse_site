@@ -77,9 +77,9 @@ class PaymentController {
       }
 
       // If signature is valid and status is pending, update the order
-      // AUTOMATICALLY CHANGE STATUS TO 'confirmed' after successful payment
+      // Update both payment_status and order_status to 'paid' after successful payment verification
       await client.query(
-          "UPDATE orders SET payment_id = $1, payment_status = 'paid', order_status = 'confirmed', razorpay_order_id = $2 WHERE id = $3", 
+          "UPDATE orders SET payment_id = $1, payment_status = 'paid', order_status = 'paid', razorpay_order_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3", 
           [razorpay_payment_id, razorpay_order_id, orderId]
       );
 

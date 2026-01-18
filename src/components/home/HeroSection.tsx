@@ -175,7 +175,7 @@ const HeroSection = () => {
           transition={{ delay: 0.8, duration: 1.2, ease: [0.6, 0.05, 0.01, 0.9] }}
           className="text-center"
         >
-          <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight" style={{ color: '#550000' }}>
+          <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl tracking-tight" style={{ color: '#550000' }}>
             قدر
           </h1>
           <p className="font-serif text-lg md:text-xl tracking-wider mt-4" style={{ color: '#f5f4f4ff' }}>

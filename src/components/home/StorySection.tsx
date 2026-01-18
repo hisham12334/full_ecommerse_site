@@ -100,7 +100,7 @@ const StoryBlock = ({ title, text, index }: { title: string; text: string; index
       transition={{ duration: 0.8, delay: index * 0.1 }}
       className="space-y-3 lg:space-y-4"
     >
-      <h3 className="font-serif text-3xl lg:text-4xl font-semibold text-charcoal">{title}</h3>
+      <h3 className="font-serif text-3xl lg:text-4xl text-charcoal">{title}</h3>
       <p className="font-sans text-base lg:text-lg leading-relaxed text-warm-grey">{text}</p>
     </motion.div>
   );

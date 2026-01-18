@@ -29,7 +29,7 @@ const MaterialSection = () => {
           viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <h2 className="font-serif text-5xl font-semibold text-charcoal md:text-6xl">
+          <h2 className="font-serif text-5xl text-charcoal md:text-6xl">
             The Material
           </h2>
           <p className="mt-4 font-mono text-sm uppercase tracking-widest text-warm-grey">
@@ -127,7 +127,7 @@ const MaterialSection = () => {
                 <p className="font-mono text-xs uppercase tracking-widest text-warm-grey">
                   {spec.label}
                 </p>
-                <p className="mt-2 font-serif text-2xl font-semibold text-charcoal">
+                <p className="mt-2 font-serif text-2xl text-charcoal">
                   {spec.value}
                 </p>
                 <p className="mt-1 font-sans text-sm text-warm-grey">

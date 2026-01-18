@@ -64,7 +64,7 @@ const AnatomySection = () => {
           viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <h2 className="font-serif text-5xl font-semibold text-charcoal md:text-6xl">
+          <h2 className="font-serif text-5xl text-charcoal md:text-6xl">
             The Anatomy
           </h2>
           <p className="mt-4 font-mono text-sm uppercase tracking-widest text-warm-grey">
@@ -123,7 +123,7 @@ const AnatomySection = () => {
                       transform: 'translateY(-50%)'
                     }}
                   >
-                    <h4 className="font-serif text-xl font-semibold text-charcoal">{hotspot.title}</h4>
+                    <h4 className="font-serif text-xl text-charcoal">{hotspot.title}</h4>
                     <p className="mt-2 font-sans text-sm leading-relaxed text-warm-grey">
                       {hotspot.description}
                     </p>

@@ -83,7 +83,21 @@ class AdminController {
     async getAllUsers(req, res) { try { const result = await this.db.query("SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC"); res.json(result.rows); } catch (error) { console.error('Error fetching users:', error); res.status(500).json({ error: 'Failed to fetch users' }); } }
     async updateUserRole(req, res) { const { id } = req.params; const { role } = req.body; if (!role || !['user', 'admin'].includes(role)) { return res.status(400).json({ error: 'Invalid role' }); } try { const result = await this.db.query("UPDATE users SET role = $1 WHERE id = $2", [role, id]); if (result.rowCount === 0) return res.status(404).json({ error: 'User not found' }); res.json({ success: true, message: 'User role updated' }); } catch (error) { console.error('Error updating user role:', error); res.status(500).json({ error: 'Failed to update user role' }); } }
     async deleteUser(req, res) { const { id } = req.params; try { const result = await this.db.query("DELETE FROM users WHERE id = $1", [id]); if (result.rowCount === 0) return res.status(404).json({ error: 'User not found' }); res.json({ success: true, message: 'User deleted' }); } catch (error) { console.error('Error deleting user:', error); res.status(500).json({ error: 'Failed to delete user' }); } }
-    async getAllOrders(req, res) { try { const result = await this.db.query(` SELECT o.*, u.name as user_name, u.email as user_email FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC `); res.json(result.rows); } catch (error) { console.error('Error fetching all orders:', error); res.status(500).json({ error: 'Failed to fetch orders' }); } }
+    async getAllOrders(req, res) {
+        try {
+            const result = await this.db.query(`
+                SELECT o.*, u.name as user_name, u.email as user_email 
+                FROM orders o 
+                JOIN users u ON o.user_id = u.id 
+                WHERE o.payment_status = 'paid'
+                ORDER BY o.created_at DESC
+            `);
+            res.json(result.rows);
+        } catch (error) {
+            console.error('Error fetching all orders:', error);
+            res.status(500).json({ error: 'Failed to fetch orders' });
+        }
+    }
     async updateOrderStatus(req, res) { 
         const { id } = req.params; 
         const { order_status } = req.body; 

@@ -28,16 +28,12 @@ const PrivacyPolicy = () => {
               <h3 className="font-serif text-xl text-charcoal mb-4">Qadr Fits Private Limited</h3>
               <div className="space-y-2 font-sans text-charcoal">
                 <p><strong>Registered Address:</strong><br />
-                Prabhavathi Meghana Towers F4, 4th Main Rd<br />
-                Maruthi Layout, Hongasandra<br />
-                Bengaluru, Karnataka 560068<br />
-                Landmark: Near Dee sports<br />
+                4th cross road, Hongasandra<br />
+                Bommanahalli, Bangalore<br />
                 India</p>
                 
                 <p><strong>Corporate Identification Number (CIN):</strong> U18101MH2024PTC123456</p>
-                <p><strong>GST Registration Number:</strong> 27AABCQ1234F1Z5</p>
                 <p><strong>Email:</strong> qadr.fits@gmail.com</p>
-                <p><strong>Phone:</strong> +91 98765 43210</p>
                 <p><strong>Website:</strong> https://qadr.fits</p>
               </div>
             </div>

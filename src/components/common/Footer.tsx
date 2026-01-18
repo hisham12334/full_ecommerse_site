@@ -18,20 +18,12 @@ const Footer = () => {
               <p className="font-sans">
                 <span className="font-medium">Address:</span><br />
                 Qadr Fits Private Limited<br />
-                Prabhavathi Meghana Towers F4, 4th Main Rd<br />
-                Maruthi Layout, Hongasandra<br />
-                Bengaluru, Karnataka 560068<br />
-                Landmark: Near Dee sports<br />
+                4th cross road, Hongasandra<br />
+                Bommanahalli, Bangalore<br />
                 India
               </p>
               <p className="font-sans">
                 <span className="font-medium">Email:</span> qadr.fits@gmail.com
-              </p>
-              <p className="font-sans">
-                <span className="font-medium">Phone:</span> +91 98765 43210
-              </p>
-              <p className="font-sans">
-                <span className="font-medium">GST:</span> 27AABCQ1234F1Z5
               </p>
             </div>
           </div>

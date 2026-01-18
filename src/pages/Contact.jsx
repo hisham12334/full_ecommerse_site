@@ -54,25 +54,9 @@ const Contact = () => {
                   <h3 className="font-serif text-xl text-charcoal mb-2">Visit Our Store</h3>
                   <p className="font-sans text-warm-grey">
                     Qadr Fits Private Limited<br />
-                    Prabhavathi Meghana Towers F4, 4th Main Rd<br />
-                    Maruthi Layout, Hongasandra<br />
-                    Bengaluru, Karnataka 560068<br />
-                    Landmark: Near Dee sports<br />
+                    4th cross road, Hongasandra<br />
+                    Bommanahalli, Bangalore<br />
                     India
-                  </p>
-                </div>
-              </div>
-
-              {/* Phone */}
-              <div className="flex items-start space-x-4">
-                <div className="bg-charcoal p-3 rounded-lg">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-xl text-charcoal mb-2">Call Us</h3>
-                  <p className="font-sans text-warm-grey">
-                    +91 98765 43210<br />
-                    <span className="text-sm">Customer Service & Orders</span>
                   </p>
                 </div>
               </div>

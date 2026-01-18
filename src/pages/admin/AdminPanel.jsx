@@ -16,7 +16,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Order #${order.id} - Shipping Label</title>
+                <title>Shipping Label</title>
                 <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     body { 
@@ -126,7 +126,6 @@ const OrderDetailsModal = ({ order, onClose }) => {
                 <div class="container">
                     <div class="header">
                         <h1>SHIPPING LABEL</h1>
-                        <p>Order #${order.id}</p>
                         <p>Date: ${new Date(order.created_at).toLocaleDateString('en-IN', {
                             year: 'numeric',
                             month: 'long',

@@ -55,7 +55,7 @@ const AnatomySection = () => {
   };
 
   return (
-    <section className="relative min-h-screen bg-cool-white py-24">
+    <section className="relative min-h-screen bg-cool-white py-12">
       <div className="container mx-auto px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

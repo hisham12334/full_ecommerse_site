@@ -30,7 +30,7 @@ const StorySection = () => {
   return (
     <>
       {/* Desktop Version - Original sticky layout */}
-      <section ref={containerRef} className="relative hidden lg:block min-h-[200vh] bg-gradient-to-b from-warm-white to-cool-white">
+      <section ref={containerRef} className="relative hidden lg:block min-h-[150vh] bg-gradient-to-b from-warm-white to-cool-white">
         <div className="sticky top-0 grid h-screen grid-cols-5">
           {/* Sticky Image - Left */}
           <motion.div
@@ -57,7 +57,7 @@ const StorySection = () => {
       </section>
 
       {/* Mobile Version - Simple stacked layout */}
-      <section className="lg:hidden bg-gradient-to-b from-warm-white to-cool-white py-16">
+      <section className="lg:hidden bg-gradient-to-b from-warm-white to-cool-white py-12">
         <div className="container mx-auto px-6">
           {/* Image */}
           <motion.div

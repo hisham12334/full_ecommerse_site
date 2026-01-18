@@ -151,7 +151,7 @@ export default function Checkout() {
 
         const paymentIntent = await apiService.request('/payments/create-intent', {
             method: 'POST',
-            body: JSON.stringify({ amount: total, orderId }),
+            body: JSON.stringify({ orderId }),
         });
 
         const options = {

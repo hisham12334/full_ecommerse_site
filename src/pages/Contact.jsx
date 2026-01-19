@@ -97,8 +97,7 @@ const Contact = () => {
             <div className="mt-12 bg-cool-white p-6 rounded-lg">
               <h3 className="font-serif text-xl text-charcoal mb-4">Business Information</h3>
               <div className="font-sans text-charcoal space-y-2 text-sm">
-                <p><strong>GST Number:</strong> 27AABCQ1234F1Z5</p>
-                <p><strong>CIN:</strong> U18101MH2024PTC123456</p>
+              
                 <p><strong>Website:</strong> https://qadr.fits</p>
               </div>
             </div>

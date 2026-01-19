@@ -18,7 +18,7 @@ class PaymentController {
   async _fulfillOrder(client, orderId, paymentId, razorpayOrderId, order) {
     // Update both payment_status and order_status to 'paid'
     await client.query(
-      "UPDATE orders SET payment_id = $1, payment_status = 'paid', order_status = 'paid', razorpay_order_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3", 
+      "UPDATE orders SET payment_id = $1, payment_status = 'paid', order_status = 'paid', razorpay_order_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3",
       [paymentId, razorpayOrderId, orderId]
     );
 
@@ -28,7 +28,7 @@ class PaymentController {
     try {
       const shippingAddress = order.shipping_address;
       const items = order.items;
-      
+
       if (shippingAddress && shippingAddress.phone) {
         await whatsappService.sendOrderConfirmedMessage(shippingAddress.phone, {
           orderId: order.id,
@@ -56,7 +56,7 @@ class PaymentController {
 
       // 1. Fetch the REAL amount and ownership from Database
       const orderResult = await this.db.query(
-        'SELECT id, total, user_id, payment_status FROM orders WHERE id = $1', 
+        'SELECT id, total, user_id, payment_status FROM orders WHERE id = $1',
         [orderId]
       );
 
@@ -73,7 +73,7 @@ class PaymentController {
 
       // 3. Prevent double payment
       if (order.payment_status === 'paid') {
-         return res.status(400).json({ error: 'Order is already paid' });
+        return res.status(400).json({ error: 'Order is already paid' });
       }
 
       const options = {
@@ -82,9 +82,9 @@ class PaymentController {
         receipt: `receipt_order_${orderId}`,
         payment_capture: 1, // Auto capture
         // Critical for Webhook: Pass orderId in notes so we can retrieve it later
-        notes: { 
-            orderId: orderId 
-        } 
+        notes: {
+          orderId: orderId
+        }
       };
 
       const razorpayOrder = await this.razorpay.orders.create(options);
@@ -102,24 +102,38 @@ class PaymentController {
 
   // --- CONFIRM PAYMENT (Frontend Flow) ---
   async confirmPayment(req, res) {
+    console.log('--- confirmPayment CALLED ---');
+    console.log('Request Headers:', req.headers);
+    console.log('Request Body:', req.body);
+
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId } = req.body;
-    
+
+    console.log(`Processing OrderID: ${orderId} (Type: ${typeof orderId})`);
+
     const client = await this.db.connect();
     try {
       await client.query('BEGIN');
 
+      if (!orderId) {
+        throw new Error('Missing orderId in request body');
+      }
+
       // Lock the order row to prevent race conditions
+      console.log('Attempting to lock order row...');
       const orderResult = await client.query("SELECT * FROM orders WHERE id = $1 FOR UPDATE", [orderId]);
-      
+
       if (orderResult.rows.length === 0) {
+        console.log(`Order ${orderId} not found.`);
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Order not found' });
       }
-      
+
       const order = orderResult.rows[0];
+      console.log('Order found:', order.id, 'Current status:', order.payment_status);
 
       // IDEMPOTENCY CHECK
       if (order.payment_status === 'paid') {
+        console.log('Order already paid.');
         await client.query('COMMIT');
         return res.json({ success: true, message: 'Payment has already been confirmed.' });
       }
@@ -129,20 +143,30 @@ class PaymentController {
       shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
       const digest = shasum.digest('hex');
 
+      console.log(`Signature verification: Calculated=${digest}, Received=${razorpay_signature}`);
+
       if (digest !== razorpay_signature) {
+        console.error('Signature mismatch!');
         await client.query('ROLLBACK');
         return res.status(400).json({ error: 'Invalid signature. Payment verification failed.' });
       }
 
       // Fulfill the order using shared helper
+      console.log('Fulfilling order...');
       await this._fulfillOrder(client, orderId, razorpay_payment_id, razorpay_order_id, order);
+      console.log('Order fulfilled successfully.');
 
       res.json({ success: true, message: 'Payment confirmed and order updated successfully.' });
 
     } catch (error) {
       await client.query('ROLLBACK');
       console.error('Failed to confirm payment:', error);
-      res.status(500).json({ error: 'Failed to confirm payment due to a server error.' });
+      // DEBUG: Expose error to client
+      res.status(500).json({
+        error: 'Failed to confirm payment due to a server error.',
+        debug_message: error.message,
+        stack: error.stack
+      });
     } finally {
       client.release();
     }
@@ -165,47 +189,47 @@ class PaymentController {
 
     // 2. Handle 'payment.captured' event
     if (event.event === 'payment.captured') {
-        const payment = event.payload.payment.entity;
-        const orderId = payment.notes.orderId; // Retrieved from notes set in createPaymentIntent
-        const paymentId = payment.id;
-        const razorpayOrderId = payment.order_id;
+      const payment = event.payload.payment.entity;
+      const orderId = payment.notes.orderId; // Retrieved from notes set in createPaymentIntent
+      const paymentId = payment.id;
+      const razorpayOrderId = payment.order_id;
 
-        if (!orderId) {
-            console.error('Webhook received but no orderId found in notes');
-            return res.status(400).json({ status: 'no orderId' });
+      if (!orderId) {
+        console.error('Webhook received but no orderId found in notes');
+        return res.status(400).json({ status: 'no orderId' });
+      }
+
+      const client = await this.db.connect();
+      try {
+        await client.query('BEGIN');
+
+        // Lock row for update
+        const orderResult = await client.query("SELECT * FROM orders WHERE id = $1 FOR UPDATE", [orderId]);
+
+        if (orderResult.rows.length === 0) {
+          await client.query('ROLLBACK');
+          return res.json({ status: 'order not found' });
         }
 
-        const client = await this.db.connect();
-        try {
-            await client.query('BEGIN');
-            
-            // Lock row for update
-            const orderResult = await client.query("SELECT * FROM orders WHERE id = $1 FOR UPDATE", [orderId]);
-            
-            if (orderResult.rows.length === 0) {
-                await client.query('ROLLBACK');
-                return res.json({ status: 'order not found' }); 
-            }
+        const order = orderResult.rows[0];
 
-            const order = orderResult.rows[0];
-
-            // Idempotency check
-            if (order.payment_status === 'paid') {
-                await client.query('COMMIT');
-                return res.json({ status: 'already processed' });
-            }
-
-            // Fulfill order
-            await this._fulfillOrder(client, orderId, paymentId, razorpayOrderId, order);
-            
-        } catch (error) {
-            await client.query('ROLLBACK');
-            console.error('Webhook processing failed:', error);
-            // Return 500 so Razorpay retries later
-            return res.status(500).json({ status: 'failed' });
-        } finally {
-            client.release();
+        // Idempotency check
+        if (order.payment_status === 'paid') {
+          await client.query('COMMIT');
+          return res.json({ status: 'already processed' });
         }
+
+        // Fulfill order
+        await this._fulfillOrder(client, orderId, paymentId, razorpayOrderId, order);
+
+      } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Webhook processing failed:', error);
+        // Return 500 so Razorpay retries later
+        return res.status(500).json({ status: 'failed' });
+      } finally {
+        client.release();
+      }
     }
 
     // Always return 200 OK to Razorpay

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import heroImage from '@/assets/images/hero-hoodie.jpg';
+import heroImage from '@/assets/images/anatomy.jpg';
 
 interface Hotspot {
   id: string;
